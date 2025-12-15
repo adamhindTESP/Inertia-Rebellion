@@ -63,6 +63,12 @@ Where:
    - Project δf(t) onto the known modulation frequencies (`f_spin ± f_sid`) to obtain recovered modulation amplitude.  
    - Sweep coupling strength α to determine minimum detectable signal (SNR > 10).
 
+### Falsification / Null Test
+
+A falsification test was performed by deliberately demodulating the recovered frequency deviation at an incorrect frequency offset from the injected modulation. When the analysis frequency was shifted by a small percentage relative to the true modulation frequency, the recovered signal collapsed to the null background.
+
+This confirms that the analysis pipeline does not produce spurious coherent signals and that signal recovery requires phase coherence at the correct frequency.
+
 ---
 
 ## 5. Decision Criteria
