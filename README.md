@@ -17,9 +17,7 @@ This repository contains the complete theoretical framework, sensitivity analysi
 
 The experiment aims to detect or constrain a hypothetical anisotropy in inertia by modeling it as a time-dependent modulation of the torsion pendulum’s effective moment of inertia:
 
-\[
-I_{\text{eff}}(t) = I_0 \left[ 1 + \alpha \cos\left(2\pi (f_{\text{spin}} + f_{\text{sid}}) t\right) \right]
-\]
+I_eff(t) = I0 [ 1 + α cos( 2π (f_spin + f_sid) t ) ]
 
 Where:
 - **α** — Dimensionless anisotropy coupling constant  
