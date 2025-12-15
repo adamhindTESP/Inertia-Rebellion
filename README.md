@@ -44,8 +44,7 @@ DECISION: GO — α_min ≤ 1 × 10⁻¹⁰
 **Conclusion:**  
 The proposed *Spinner* apparatus is theoretically capable of probing α down to the 10⁻¹⁰ level within a 48-hour integration. This warrants proceeding to the hardware construction phase.
 
-The full sensitivity analysis is located in:  
-`/simulation/sensitivity_analysis.ipynb`
+The full sensitivity analysis is implemented in: /simulation/sensitivity_analysis.py
 
 ---
 
