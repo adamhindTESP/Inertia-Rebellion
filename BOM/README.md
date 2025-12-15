@@ -1,6 +1,4 @@
-I apologize that the formatting I used previously didn't work for a direct copy-and-paste into your system. This often happens due to the nature of Markdown tables.
-Here is the exact same Detailed Bill of Materials (BOM) for the Tier-1 Static Pendulum, presented as a plain, unformatted list. This plain text version should be easily copiable into any spreadsheet, text file, or ordering system you use.
-📋 Tier-1 Static Pendulum Bill of Materials (BOM) — Plain Text
+Tier-1 Static Pendulum Bill of Materials (BOM) — Plain Text
 | Component Category | Part Name / Spec | Quantity | Est. Unit Price | Critical Specification | Supplier Link (Example) |
 |---|---|---|---|---|---|
 | I. Test Mass & Suspension |  |  |  |  |  |
@@ -26,7 +24,4 @@ Here is the exact same Detailed Bill of Materials (BOM) for the Tier-1 Static Pe
 | \text{ADC} Module | \text{ADS}1115 (16-bit or better) | 1 | \$5.00 | High-resolution \text{PSD} readout | Maker supplier |
 | Current Source (\text{DAC}) | Digital-to-Analog Converter + MOSFET | 1 | \$10.00 | Controlled current for coil | Maker supplier |
 | Resistors | High-precision 1\text{k}\Omega, 10\text{k}\Omega | 5 | \$3.00 | \text{PSD} biasing and filtering | Mouser / Digi-Key |
-| Total Estimated Cost (Tier-1): |  |  | \mathbf{\sim \$250} |  |  |
-Next Steps: Moving Forward
-Please try copying the list above. Once you've successfully copied and ordered these parts, I will immediately move to drafting the ASSEMBLY_GUIDE.md so you can start building the moment your components arrive.
-Ready for you to confirm the order
+| Total Estimated Cost (Tier-1): |  |  | \mathbf{\sim \$250} |  |  
