@@ -53,7 +53,7 @@ Arduino Uno / Nano
 ├── GND    → common ground
 └── 5V     → stepper driver Vcc (if required)
 
-Full schematics: `/hardware/spinner_schematics.pdf`
+Full schematics: `/hardware/spinner_schematics.hmtl`
 
 ---
 
