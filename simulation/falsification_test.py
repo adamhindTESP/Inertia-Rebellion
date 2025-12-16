@@ -1,5 +1,5 @@
 # ============================================================
-# Inertia Rebellion - Tightened Falsification Test
+# Inertia Rebellion - Tightened Falsification Test (Gate 0)
 # ============================================================
 
 import numpy as np
@@ -9,7 +9,7 @@ from scipy.signal import butter, filtfilt
 # ----------------- Hardware Parameters -----------------
 I0 = 1.0e-3          # kg·m²
 kappa = 1.0e-4       # N·m/rad
-gamma = kappa / 1e5  # damping for Q ≈ 10^5
+gamma = kappa / 1e5  # damping for Q ≈ 1e5
 f0 = np.sqrt(kappa / I0) / (2 * np.pi)
 
 # ----------------- Modulation Parameters -----------------
@@ -19,21 +19,27 @@ phi = 0.0
 
 # Frequencies
 f_true = f_spin + f_sid
-delta = 0.02                # 2% offset for false test
+delta = 0.02                  # 2% offset for falsification
 f_false = f_true * (1 + delta)
 
 # ----------------- Simulation Settings -----------------
-duration = 48 * 3600.0      # 48 hours
-fs = 1.0                     # Hz
-t_eval = np.arange(0, duration, 1/fs)
-dt = 1/fs
-y0 = [1e-6, 0.0]            # initial conditions
-noise_density = 1.0e-8      # rad/√Hz
-num_realizations = 10        # average to reduce noise
+duration = 48 * 3600.0        # 48 hours
+fs = 1.0                      # Hz
+dt = 1 / fs
+t_eval = np.arange(0, duration, dt)
+
+y0 = [1e-6, 0.0]              # initial conditions
+noise_density = 1.0e-8        # rad / sqrt(Hz)
+num_realizations = 10
+
+# Edge trimming (to suppress filtfilt artifacts)
+trim_s = 600.0                # 10 minutes
+trim_mask = (t_eval >= trim_s) & (t_eval <= (duration - trim_s))
+t_trim = t_eval[trim_mask]
 
 # ----------------- Core Functions -----------------
 def epsilon_total(t, alpha):
-    return alpha * np.cos(2 * np.pi * (f_spin + f_sid) * t + phi)
+    return alpha * np.cos(2 * np.pi * f_true * t + phi)
 
 def airm_eom(t, y, alpha):
     theta, theta_dot = y
@@ -47,68 +53,81 @@ def run_simulation(alpha):
         [0, duration],
         y0,
         t_eval=t_eval,
-        method="RK45",
         rtol=1e-9,
         atol=1e-12
     )
-    theta = sol.y[0]
-    return theta
+    return sol.y[0]
 
-def extract_modulation_power(delta_f, target_freq):
-    cos_temp = np.cos(2 * np.pi * target_freq * t_eval)
-    sin_temp = np.sin(2 * np.pi * target_freq * t_eval)
-    cos_temp /= np.sqrt(np.mean(cos_temp**2))
-    sin_temp /= np.sqrt(np.mean(sin_temp**2))
-    a = np.mean(delta_f * cos_temp)
-    b = np.mean(delta_f * sin_temp)
+def extract_modulation_power(delta_f, target_freq, t):
+    cos_t = np.cos(2 * np.pi * target_freq * t)
+    sin_t = np.sin(2 * np.pi * target_freq * t)
+
+    cos_t /= np.sqrt(np.mean(cos_t**2))
+    sin_t /= np.sqrt(np.mean(sin_t**2))
+
+    a = np.mean(delta_f * cos_t)
+    b = np.mean(delta_f * sin_t)
     return np.sqrt(a**2 + b**2)
 
 # ----------------- Run Falsification Test -----------------
-alpha = 1e-11  # GO-level modulation
+alpha = 1e-11  # Test amplitude
 
 amps_true = []
 amps_false = []
 
+# Correct discrete-time noise scaling (one-sided ASD)
+noise_rms_per_sample = noise_density * np.sqrt(fs / 2.0)
+
 for _ in range(num_realizations):
     theta = run_simulation(alpha)
-    # Add noise
-    theta_noisy = theta + noise_density * np.sqrt(fs) * np.random.randn(len(theta))
 
-    # Demodulate at f0
+    # Add noise
+    theta_noisy = theta + noise_rms_per_sample * np.random.randn(len(theta))
+
+    # Quadrature demodulation at f0
     cos_ref = np.cos(2 * np.pi * f0 * t_eval)
     sin_ref = np.sin(2 * np.pi * f0 * t_eval)
+
     I = theta_noisy * cos_ref
     Q = -theta_noisy * sin_ref
 
-    # Low-pass filter (tight)
-    cutoff = 0.003
+    # Low-pass filter
+    cutoff = 0.003  # Hz
     b, a = butter(6, cutoff / (fs / 2), 'low')
-    I_low = filtfilt(b, a, I)
-    Q_low = filtfilt(b, a, Q)
+    I_f = filtfilt(b, a, I)
+    Q_f = filtfilt(b, a, Q)
 
-    # Phase and detrend
-    phase = np.unwrap(np.arctan2(Q_low, I_low))
+    # Phase → frequency deviation
+    phase = np.unwrap(np.arctan2(Q_f, I_f))
     slope, intercept = np.polyfit(t_eval, phase, 1)
     phase_detrended = phase - (slope * t_eval + intercept)
+
     dphase_dt = np.gradient(phase_detrended, dt)
     delta_f = dphase_dt / (2 * np.pi)
 
-    # Extract modulation amplitudes
-    amps_true.append(extract_modulation_power(delta_f, f_true))
-    amps_false.append(extract_modulation_power(delta_f, f_false))
+    # Trim edges
+    delta_f_trim = delta_f[trim_mask]
 
-# Average results
+    # Extract amplitudes
+    amps_true.append(
+        extract_modulation_power(delta_f_trim, f_true, t_trim)
+    )
+    amps_false.append(
+        extract_modulation_power(delta_f_trim, f_false, t_trim)
+    )
+
+# ----------------- Results -----------------
 amp_true_avg = np.mean(amps_true)
 amp_false_avg = np.mean(amps_false)
 ratio = amp_false_avg / (amp_true_avg + 1e-30)
 
-# Print results
-print("Tightened Falsification Test Results")
+print("\nTightened Falsification Test Results")
+print("------------------------------------")
 print(f"True frequency amplitude:  {amp_true_avg:.2e} Hz")
 print(f"False frequency amplitude: {amp_false_avg:.2e} Hz")
 print(f"False / True ratio:        {ratio:.3e}")
 
 if ratio < 0.1:
-    print("✅ PASS: Signal collapses under frequency offset.")
+    print("✅ PASS: Signal collapses under frequency offset (Gate 0 PASSED)")
 else:
-    print("⛔ FAIL: Signal persists under frequency offset.")
+    print("⛔ FAIL: Frequency discrimination insufficient (Gate 0 FAILED)")
