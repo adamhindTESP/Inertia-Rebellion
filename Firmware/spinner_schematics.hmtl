@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIRM Spinner - Hardware Schematics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Courier New', monospace;
+        background: white;
+        padding: 20px;
+    }
+    
+    .page {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border: 2px solid #000;
+    }
+    
+    .header {
+        border-bottom: 3px solid #000;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .header h1 {
+        font-size: 28px;
+        margin-bottom: 5px;
+    }
+    
+    .header .subtitle {
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .purpose {
+        background: #e3f2fd;
+        border-left: 4px solid #2196F3;
+        padding: 15px;
+        margin: 20px 0;
+        font-size: 14px;
+    }
+    
+    .citation {
+        background: #f5f5f5;
+        border-left: 4px solid #757575;
+        padding: 15px;
+        margin: 20px 0;
+        font-size: 14px;
+    }
+    
+    .schematic-section {
+        margin-bottom: 40px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        background: #fafafa;
+    }
+    
+    .schematic-section h2 {
+        font-size: 18px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 5px;
+    }
+    
+    .component-diagram {
+        background: white;
+        border: 2px solid #000;
+        padding: 20px;
+        margin: 20px 0;
+        font-family: monospace;
+        line-height: 1.8;
+        overflow-x: auto;
+        white-space: pre;
+    }
+    
+    .pin-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+    
+    .pin-table th,
+    .pin-table td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+    }
+    
+    .pin-table th {
+        background: #e0e0e0;
+        font-weight: bold;
+    }
+    
+    .notes {
+        background: #ffffcc;
+        border-left: 4px solid #ff9800;
+        padding: 15px;
+        margin: 20px 0;
+    }
+    
+    .safety {
+        background: #ffebee;
+        border-left: 4px solid #f44336;
+        padding: 15px;
+        margin: 20px 0;
+    }
+    
+    .notes h3, .safety h3, .citation strong {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+    
+    .notes ol, .notes ul {
+        margin-left: 20px;
+        margin-top: 10px;
+    }
+    
+    .notes li, .safety p {
+        margin-bottom: 5px;
+    }
+    
+    .bom-section {
+        margin-top: 30px;
+    }
+    
+    @media print {
+        .page {
+            border: none;
+            padding: 0;
+        }
+        .button-container {
+            display: none;
+        }
+    }
+    
+    .button-container {
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .download-btn {
+        background: #2196F3;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    
+    .download-btn:hover {
+        background: #0b7dda;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <h1>AIRM SPINNER - Hardware Schematics</h1>
+            <div class="subtitle">Inertia Rebellion Project | Version 0.1 | December 2025</div>
+            <div class="subtitle">CERN OHL-P v2 | Open Hardware Design</div>
+        </div>
+
+```
+    <div class="purpose">
+        <strong>Document Purpose:</strong> This document serves as both a construction reference for builders and a technical description suitable for supplementary material in publications. It includes circuit schematics, calibration procedures, and validation protocols for the AIRM Spinner torsion balance apparatus.
+    </div>
+
+    <div class="citation">
+        <p><strong>Citation note:</strong> This document may be referenced as supplementary material for the Inertia Rebellion Project (2025).</p>
+    </div>
+
+    <div class="button-container">
+        <button class="download-btn" onclick="window.print()">📄 Save as PDF (Ctrl+P)</button>
+    </div>
+
+    <div class="schematic-section">
+        <h2>1. SYSTEM OVERVIEW</h2>
+        <div class="component-diagram">┌─────────────────────────────────────────────────────────────────┐
+```
+
+│                    AIRM SPINNER ARCHITECTURE                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────┐         ┌──────────────┐                    │
+│  │  ARDUINO UNO │◄────────┤  USB POWER   │                    │
+│  │              │         │   (5V/500mA) │                    │
+│  └──────┬───────┘         └──────────────┘                    │
+│         │                                                      │
+│         ├─────► Pin 2 (STEP) ──┐                              │
+│         ├─────► Pin 3 (DIR)  ──┤                              │
+│         │                       ▼                              │
+│         │              ┌──────────────┐                        │
+│         │              │  A4988 DRIVER│                        │
+│         │              └───────┬──────┘                        │
+│         │                      │                               │
+│         │                      ▼                               │
+│         │              ┌──────────────┐                        │
+│         │              │ NEMA 17      │                        │
+│         │              │ STEPPER      │                        │
+│         │              │ (200 steps)  │                        │
+│         │              └───────┬──────┘                        │
+│         │                      │                               │
+│         │                      ▼                               │
+│         │              ┌──────────────┐                        │
+│         │              │ ROTATION     │                        │
+│         │              │ STAGE        │                        │
+│         │              │ (1:1 coupled)│                        │
+│         │              └──────────────┘                        │
+│         │                                                      │
+│         ├─────► Pin 9 (PWM) ──────► MOSFET ──► Magnetic Coil  │
+│         │                           (IRLZ44N)   (Calibration)  │
+│         │                       Logic-Level                    │
+│         │                                                      │
+│         └─────► A0 (ADC) ◄──────────┐                         │
+│                                      │                         │
+│                              ┌───────┴──────┐                  │
+│                              │ PHOTODIODE   │                  │
+│                              │ (BPW34)      │                  │
+│                              │ + 10kΩ load  │                  │
+│                              └───────▲──────┘                  │
+│                                      │                         │
+│                              ┌───────┴──────┐                  │
+│                              │ LASER DIODE  │                  │
+│                              │ (650nm, 5mW) │                  │
+│                              │ Optical Lever│                  │
+│                              └──────────────┘                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</div>
+</div>
+
+```
+    <div class="schematic-section">
+        <h2>2. ARDUINO UNO/NANO PINOUT</h2>
+        <table class="pin-table">
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Function</th>
+                    <th>Connection</th>
+                    <th>Signal Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Pin 2</td>
+                    <td>Stepper STEP</td>
+                    <td>A4988 STEP input</td>
+                    <td>Digital OUT (5V logic)</td>
+                </tr>
+                <tr>
+                    <td>Pin 3</td>
+                    <td>Stepper DIR</td>
+                    <td>A4988 DIR input</td>
+                    <td>Digital OUT (5V logic)</td>
+                </tr>
+                <tr>
+                    <td>Pin 9</td>
+                    <td>Magnetic Coil PWM</td>
+                    <td>IRLZ44N MOSFET Gate</td>
+                    <td>PWM OUT (0-5V)</td>
+                </tr>
+                <tr>
+                    <td>A0</td>
+                    <td>Optical Lever Readout</td>
+                    <td>Photodiode voltage divider</td>
+                    <td>Analog IN (0-5V → 0-1023)</td>
+                </tr>
+                <tr>
+                    <td>GND</td>
+                    <td>Common Ground</td>
+                    <td>All subsystems</td>
+                    <td>Ground reference</td>
+                </tr>
+                <tr>
+                    <td>5V</td>
+                    <td>Power Output</td>
+                    <td>Laser diode, photodiode bias</td>
+                    <td>+5V supply</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="schematic-section">
+        <h2>3. STEPPER MOTOR DRIVE CIRCUIT</h2>
+        <div class="component-diagram">                                  +12V External Supply
+                                   │
+                                   ▼
+                      ┌────────────────────────┐
+                      │     A4988 Driver       │
+                      │                        │
+```
+
+Arduino Pin 2 ───────────┤ STEP                   │
+│                        │
+Arduino Pin 3 ───────────┤ DIR                    │
+│                        │
+Arduino GND ─────────────┤ GND        1A   ───────┤──► NEMA 17
+│            1B   ───────┤    Coil A
++12V ────────────────────┤ VMOT       2A   ───────┤──► NEMA 17
+│            2B   ───────┤    Coil B
+GND ─────────────────────┤ GND                    │
+│                        │
+│ MS1, MS2, MS3 ─────────┤──► GND (full step)
+│                        │
+│ ENABLE ────────────────┤──► GND (always on)
+│                        │
+└────────────────────────┘
+
+SPECIFICATIONS:
+
+- Stepper: NEMA 17 (200 steps/rev, 1.8° step angle)
+- Driver: A4988 or DRV8825
+- Microstepping: Full step mode (MS1=MS2=MS3=GND)
+- Current limit: Set to 0.8-1.0A via potentiometer
+- Step timing: Firmware sets step interval to 1 step/s in full-step mode
+- Result: 1000 steps = 5 revolutions = 1000 seconds (f_spin = 0.001 Hz)</div>
+  
+  ```
+        <div class="notes">
+            <h3>⚠ CRITICAL: Current Limit Adjustment</h3>
+            <p>Before connecting the stepper motor, adjust the A4988 current limit:</p>
+            <ol>
+                <li>Disconnect stepper motor</li>
+                <li>Power on A4988 with 12V supply</li>
+                <li>Measure Vref between potentiometer wiper and GND</li>
+                <li>Adjust potentiometer until Vref ≈ 0.4V (sets ~1A limit)</li>
+                <li>Formula: I_limit = Vref / (8 × R_sense), where R_sense = 0.05Ω</li>
+            </ol>
+        </div>
+    </div>
+  
+    <div class="schematic-section">
+        <h2>4. OPTICAL LEVER READOUT CIRCUIT</h2>
+        <div class="component-diagram">                    +5V (Arduino)
+                 │
+                 │    R1 = 330Ω
+                 ├────/\/\/\────┐
+                 │              │
+                 │              ▼
+                 │        ┌─────────┐
+                 │        │ LASER   │  650nm, 5mW
+                 │        │ DIODE   │  (redirected by mirror
+                 │        └─────────┘   on torsion pendulum)
+                 │
+                GND                      
+                                         
+                                         ↓ Reflected beam
+                                         
+                 │                  ┌─────────┐
+                 │                  │PHOTODIODE│ BPW34
+                 │                  │ (BPW34) │ (reversed bias)
+                 │                  └────┬────┘
+                 │                       │
+                 │              R2 = 10kΩ
+                 ├──────────────/\/\/\───┤
+                 │                       │
+                GND                      ├──────► Arduino A0
+                                         │       (0-5V → 0-1023 ADC)
+                                    C1 = 10nF
+                                         │
+                                        GND
+  ```
+
+READOUT PRINCIPLE:
+
+- Laser reflects off mirror attached to torsion fiber
+- Angular deflection θ causes beam displacement on photodiode
+- Photodiode current ∝ light intensity
+- Voltage across R2 ∝ θ(t)
+- ADC conversion: 1 ADC unit ≈ 4.9 mV
+
+EXPECTED RANGE (typical after optical alignment):
+
+- θ = 0 (equilibrium): ADC ≈ 512 (centered)
+- θ = +10 mrad: ADC ≈ 612
+- θ = -10 mrad: ADC ≈ 412
+- Sensitivity: ~10 ADC units / mrad (adjustable via optical path length)</div>
+  
+  ```
+        <div class="safety">
+            <h3>⚠ LASER SAFETY</h3>
+            <p>The 650 nm, 5 mW laser diode is Class 3R (Class IIIa). Avoid direct eye exposure. Always operate below eye level and use beam stops where possible. Never look directly into the beam or its specular reflections.</p>
+        </div>
+  
+        <div class="notes">
+            <h3>📊 Calibration Procedure</h3>
+            <p>To calibrate the optical lever sensitivity:</p>
+            <ol>
+                <li>Apply known torque pulse via magnetic coil (see Section 5)</li>
+                <li>Measure resulting θ_max from ADC data</li>
+                <li>Calculate: sensitivity = Δ(ADC) / Δθ</li>
+                <li>Expected: ~10 ADC units per milliradian (geometry-dependent)</li>
+            </ol>
+        </div>
+    </div>
+  
+    <div class="schematic-section">
+        <h2>5. MAGNETIC CALIBRATION COIL CIRCUIT</h2>
+        <div class="component-diagram">                                  +12V External
+                                   │
+                                   │
+                                   ├─────┐
+                                   │     │
+                                   │    ═╪═  Magnetic Coil
+                                   │    ═╪═  (500 turns, 28 AWG)
+                                   │     │   L ≈ 10 mH
+                                   │     │
+                                   │     ├──── Diode (1N4007)
+                                   │     │     (flyback protection)
+                                   │     │
+                                   └─────┤ D
+                                         │
+                      ┌──────────────────┤ IRLZ44N MOSFET
+                      │            G     │ (Logic-Level)
+  ```
+
+Arduino Pin 9 (PWM) ──────┤            S     │
+│                  │
+GND                GND
+
+OPERATION:
+
+- Arduino Pin 9 outputs PWM signal (0-255)
+- Logic-level MOSFET (IRLZ44N) acts as electronic switch
+- Fully on at Vgs = 5V (Rds(on) < 0.05Ω at 5V gate drive)
+- When PWM HIGH: current flows through coil → magnetic field
+- When PWM LOW: diode clamps inductive kickback
+- Calibration pulse: 100ms at 50% duty cycle
+
+COIL SPECIFICATIONS:
+
+- Geometry: Solenoid, 2cm diameter × 3cm length
+- Turns: 500 (28 AWG magnet wire)
+- Resistance: ~5Ω
+- Inductance: ~10 mH
+- Peak current: ~1A (at 12V, limited by resistance)
+
+TORQUE ESTIMATION:
+
+- Magnetic field at center: B ≈ μ₀ × N × I / L ≈ 20 mT
+- Test mass: small magnet (NdFeB, ~1g, 0.1 A·m²)
+- Estimated torque: τ ~ 10⁻⁶ N·m (order-of-magnitude, geometry-dependent)
+- Actual torque must be calibrated against known torsion fiber properties</div>
+  
+  ```
+        <div class="notes">
+            <h3>⚠ MOSFET Selection Critical</h3>
+            <p><strong>Must use logic-level MOSFET</strong> (Rds(on) specified at Vgs = 4.5V)</p>
+            <p><strong>Recommended:</strong> IRLZ44N, IRL540N, or AO3400 (SMD)</p>
+            <p><strong>DO NOT USE:</strong> IRF520, IRF540 (standard level - will not fully turn on at 5V)</p>
+        </div>
+    </div>
+  
+    <div class="schematic-section">
+        <h2>6. POWER DISTRIBUTION</h2>
+        <table class="pin-table">
+            <thead>
+                <tr>
+                    <th>Subsystem</th>
+                    <th>Voltage</th>
+                    <th>Current</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Arduino Uno</td>
+                    <td>5V</td>
+                    <td>50-100 mA</td>
+                    <td>USB (computer or 5V wall adapter)</td>
+                </tr>
+                <tr>
+                    <td>A4988 Logic</td>
+                    <td>5V</td>
+                    <td>20 mA</td>
+                    <td>From Arduino 5V pin</td>
+                </tr>
+                <tr>
+                    <td>Stepper Motor (via A4988)</td>
+                    <td>12V</td>
+                    <td>Up to 1A</td>
+                    <td>External 12V/2A power supply</td>
+                </tr>
+                <tr>
+                    <td>Magnetic Coil</td>
+                    <td>12V</td>
+                    <td>Up to 1A (pulsed)</td>
+                    <td>Same 12V supply as stepper</td>
+                </tr>
+                <tr>
+                    <td>Laser Diode</td>
+                    <td>5V</td>
+                    <td>~15 mA (via 330Ω resistor)</td>
+                    <td>Arduino 5V pin</td>
+                </tr>
+                <tr>
+                    <td>Photodiode</td>
+                    <td>5V</td>
+                    <td>&lt;1 mA</td>
+                    <td>Arduino 5V pin</td>
+                </tr>
+            </tbody>
+        </table>
+  
+        <div class="notes">
+            <h3>⚡ Power Supply Recommendations</h3>
+            <ul>
+                <li><strong>Arduino:</strong> Use USB from computer for data + power, OR dedicated 5V/1A adapter</li>
+                <li><strong>Stepper + Coil:</strong> 12V/2A wall adapter (center positive barrel jack)</li>
+                <li><strong>Ground:</strong> Connect Arduino GND to external 12V GND (common ground essential)</li>
+            </ul>
+        </div>
+    </div>
+  
+    <div class="bom-section">
+        <h2>7. BILL OF MATERIALS (BOM)</h2>
+        <table class="pin-table">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Specification</th>
+                    <th>Qty</th>
+                    <th>Est. Cost (USD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Arduino Uno R3</td>
+                    <td>ATmega328P, USB-B</td>
+                    <td>1</td>
+                    <td>$25</td>
+                </tr>
+                <tr>
+                    <td>A4988 Stepper Driver</td>
+                    <td>With heatsink</td>
+                    <td>1</td>
+                    <td>$5</td>
+                </tr>
+                <tr>
+                    <td>NEMA 17 Stepper</td>
+                    <td>200 steps/rev, 1.8°, bipolar</td>
+                    <td>1</td>
+                    <td>$15</td>
+                </tr>
+                <tr>
+                    <td>IRLZ44N MOSFET</td>
+                    <td>Logic-level N-channel, TO-220</td>
+                    <td>1</td>
+                    <td>$1</td>
+                </tr>
+                <tr>
+                    <td>1N4007 Diode</td>
+                    <td>1A, 1000V (flyback protection)</td>
+                    <td>1</td>
+                    <td>$0.20</td>
+                </tr>
+                <tr>
+                    <td>Laser Diode Module</td>
+                    <td>650nm, 5mW, 5V input, Class 3R</td>
+                    <td>1</td>
+                    <td>$5</td>
+                </tr>
+                <tr>
+                    <td>Photodiode BPW34</td>
+                    <td>Silicon, 950nm peak (works at 650nm)</td>
+                    <td>1</td>
+                    <td>$2</td>
+                </tr>
+                <tr>
+                    <td>Resistor 330Ω</td>
+                    <td>1/4W, 5%</td>
+                    <td>1</td>
+                    <td>$0.10</td>
+                </tr>
+                <tr>
+                    <td>Resistor 10kΩ</td>
+                    <td>1/4W, 5%</td>
+                    <td>1</td>
+                    <td>$0.10</td>
+                </tr>
+                <tr>
+                    <td>Capacitor 10nF</td>
+                    <td>Ceramic, 50V</td>
+                    <td>1</td>
+                    <td>$0.10</td>
+                </tr>
+                <tr>
+                    <td>Magnet Wire</td>
+                    <td>28 AWG, ~10m for coil</td>
+                    <td>1</td>
+                    <td>$3</td>
+                </tr>
+                <tr>
+                    <td>12V Power Supply</td>
+                    <td>2A, center positive</td>
+                    <td>1</td>
+                    <td>$10</td>
+                </tr>
+                <tr>
+                    <td>Breadboard/Perfboard</td>
+                    <td>For prototyping</td>
+                    <td>1</td>
+                    <td>$5</td>
+                </tr>
+                <tr>
+                    <td>Jumper Wires</td>
+                    <td>Male-male, various lengths</td>
+                    <td>20</td>
+                    <td>$3</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="margin-top: 15px;"><strong>TOTAL ESTIMATED COST: ~$75</strong> (electronics only, excludes mechanical components)</p>
+    </div>
+  
+    <div class="schematic-section">
+        <h2>8. TESTING & VALIDATION CHECKLIST</h2>
+        <div class="notes">
+            <h3>✅ Pre-Integration Tests</h3>
+            <ol>
+                <li><strong>Arduino:</strong> Upload Blink sketch, verify USB communication</li>
+                <li><strong>Stepper:</strong> Test rotation at 1 rev/200s (should be smooth and consistent)</li>
+                <li><strong>Optical Lever:</strong> Manually deflect pendulum, observe ADC changes (verify ~512 at rest after alignment)</li>
+                <li><strong>Magnetic Coil:</strong> Send 'C' command, verify torque pulse detected in ADC trace</li>
+                <li><strong>Data Logging:</strong> Record 10 minutes of data, verify CSV format and 1 Hz sampling rate</li>
+                <li><strong>MOSFET Test:</strong> Verify coil driver with multimeter - should see ~12V across coil during pulse</li>
+            </ol>
+        </div>
+    </div>
+  
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #000; text-align: center; font-size: 12px;">
+        <p><strong>Inertia Rebellion - AIRM Spinner</strong></p>
+        <p>Hardware Revision 0.1 | December 2025</p>
+        <p>Licensed under CERN OHL-P v2 | github.com/adamhindTESP/Inertia-Rebellion</p>
+    </div>
+  ```
+  
+    </div>
+
+</body>
+</html>
