@@ -1,101 +1,185 @@
-# AIRM Sensitivity Simulations
+# Simulation — AIRM Sensitivity & Falsification
 
-This directory contains numerical simulations used to evaluate the detectability of small, time-dependent modulations in the effective inertia of a torsional oscillator.
+This directory contains **numerical simulations** used to validate the analysis pipeline and quantify the **detectability** of small, externally prescribed modulations in the effective inertia of a torsional oscillator.
 
-**Important:** These simulations are sensitivity and validation studies only. They do **not** assert the existence of new physics and make no claims about fundamental mechanisms. All assumptions are explicit, and the code is provided for independent review and falsification.
+⚠️ **Important scientific scope statement**
+
+These simulations:
+- **Do NOT claim new physics**
+- **Do NOT assert the existence of anisotropic inertia**
+- **DO** test whether a proposed signal-processing pipeline can recover a *known injected signal* under controlled assumptions
+- **DO** implement falsification and null tests
+
+All assumptions are explicit. All code is provided for independent review, reproduction, and criticism.
 
 ---
 
-## Overview
+## Purpose of This Directory
 
-The simulations model a torsion pendulum with a phenomenological fractional modulation of the effective moment of inertia:
+The simulations serve four tightly defined roles:
 
-$$
-I(t) = I_0 \,[1 + \epsilon(t)]
-$$
+1. **Sensitivity estimation**  
+   Determine what modulation amplitudes `α` would be detectable *if* they existed.
 
-where `ε(t)` is a small, externally prescribed function used solely to test analysis sensitivity.
+2. **Pipeline validation**  
+   Verify that the demodulation + extraction chain behaves correctly.
 
-Two configurations are provided:  
+3. **Null testing**  
+   Establish the numerical noise floor with no injected signal.
 
-1. **Baseline Control:** no modulation  
-2. **Spinner-Enabled Simulation:** prescribed modulation at known frequencies \(f_\text{spin} \pm f_\text{sid}\)
+4. **Falsification**  
+   Demonstrate that recovered signals collapse when tested at the wrong frequency.
+
+This directory is the **numerical analog of Tier 1 hardware validation**.
+
+---
+
+## Core Physical Model (As Implemented)
+
+The torsion pendulum is modeled with a *phenomenological* time-dependent effective inertia:
+
+\[
+I_{\mathrm{eff}}(t) = I_0 \,[1 + \epsilon(t)]
+\]
+
+where the modulation is externally prescribed as:
+
+\[
+\epsilon(t) = \alpha \cos\!\left(2\pi f_{\mathrm{target}} t + \phi\right),
+\quad
+f_{\mathrm{target}} = f_{\mathrm{spin}} + f_{\mathrm{sid}}.
+\]
+
+The equation of motion integrated by the code is:
+
+\[
+I_0[1+\epsilon(t)]\,\ddot{\theta}(t)
++ \gamma\,\dot{\theta}(t)
++ \kappa\,\theta(t) = 0.
+\]
+
+This form is used **only** to test detectability and analysis robustness.
+
+---
+
+## Noise Model (Explicit and Auditable)
+
+The simulations assume Gaussian measurement noise specified as a **one-sided amplitude spectral density**:
+
+- Units: rad / √Hz
+
+Discrete per-sample RMS noise is computed as:
+
+\[
+\sigma_{\mathrm{sample}} = \mathrm{ASD}\,\sqrt{\frac{f_s}{2}}.
+\]
+
+This convention matches standard signal-processing practice and is enforced consistently throughout the code.
+
+---
+
+## Analysis Pipeline (Exactly What the Code Does)
+
+For each realization:
+
+1. Integrate the equation of motion using `solve_ivp`
+2. Add measurement noise
+3. Perform **IQ demodulation at the natural frequency** \(f_0\)
+4. Low-pass filter to isolate baseband phase evolution
+5. Unwrap phase and remove linear trend
+6. Convert phase slope to instantaneous frequency deviation:
+   \[
+   \delta f(t) = \frac{1}{2\pi}\frac{d\phi}{dt}
+   \]
+7. Estimate recovered signal amplitude using **coherent projection**
+   (matched filtering) at:
+   - the injected target frequency
+   - a nearby “wrong” frequency (falsification test)
 
 ---
 
 ## Files
 
-| File | Purpose | Expected Result |
-|------|--------|----------------|
-| [`baseline_no_spinner.py`](baseline_no_spinner.py) | Control simulation with no imposed modulation | No statistically significant signal at target frequencies; establishes numerical noise floor |
-| [`sensitivity_analysis.py`](sensitivity_analysis.py) | Spinner-enabled sensitivity study with sweep over modulation amplitude `α` | Linear scaling of recovered signal with `α`; clear separation from null background; GO/NO-GO thresholds established |
-| [`falsification_test.py`](falsification_test.py) | Validates analysis by testing a nearby “wrong” frequency | Signal collapses when demodulated at offset frequency (confirms pipeline correctness) |
-| [`methods.md`](methods.md) | Detailed derivations of EOM, demodulation, and noise modeling | Reference for contributors to understand math and implementation |
-| [`README_spinner.md`](README_spinner.md) | Companion README for spinner simulation | Optional, keeps main README concise |
+| File | Role |
+|-----|-----|
+| `sensitivity_analysis.py` | Main script: sensitivity sweep, null distribution, falsification |
+| `baseline_no_spinner.py` | Control simulation with `α = 0` only |
+| `falsification_test.py` | Focused wrong-frequency collapse test |
+| `methods.md` | Mathematical derivations and signal-processing rationale |
+| `README.md` | This document |
 
 ---
 
-## Simulation Description
+## GO / NO-GO Logic
 
-**Pendulum Parameters**
+The sensitivity script performs:
 
-- \( \omega_0 = \sqrt{\kappa / I_0} \approx 0.316\ \text{rad/s} \)  
-- \( f_0 = \omega_0 / 2\pi \approx 0.0503\ \text{Hz} \)  
-- \( \gamma = \kappa / 10^5 \approx 10^{-9}\ \text{N·m·s/rad} \) (Q = 100,000)  
-- Initial deflection: \( \theta_0 = 10^{-6}\ \text{rad} \)
+- **Null runs** (`α = 0`) → establishes numerical noise distribution
+- **Sweep over α** → measures recovered amplitude vs null
+- **SNR vs null**:
+  \[
+  \mathrm{SNR} = \frac{\langle A_{\mathrm{true}}\rangle - \mu_{\mathrm{null}}}{\sigma_{\mathrm{null}}}
+  \]
 
-**Modulation**
+### Decision rule (as coded)
 
-$$
-\epsilon(t) = \alpha \cos\big[ 2 \pi (f_\text{spin} + f_\text{sid}) t + \phi \big]
-$$
+- **GO** if best recovered SNR ≥ 10  
+- **NO-GO** otherwise
 
-- \( f_\text{spin} = 0.001\ \text{Hz} \)  
-- \( f_\text{sid} \approx 1.1606 \times 10^{-5}\ \text{Hz} \)
+A falsification ratio is also reported:
 
-**Noise**
+\[
+\text{false/true} =
+\frac{A(f_{\mathrm{false}})}{A(f_{\mathrm{target}})}.
+\]
 
-- Gaussian, RMS ≈ \( 1 \times 10^{-8}\ \text{rad/sample} \), simulating optical lever readout
-
-**Analysis Pipeline**
-
-- Quadrature demodulation with low-pass filtering isolates frequency modulation  
-- Instantaneous frequency extracted via phase derivative (Hilbert transform)  
-- Signal amplitude computed by projection onto cos/sin reference at target frequency  
-
-**Sweep & Decision**
-
-- Vary `α` (logspace) → compute SNR against null runs → define conservative GO / NO-GO thresholds
+Values ≪ 1 indicate a well-behaved pipeline.
 
 ---
 
-## Important Notes
+## Outputs
 
-- `ε(t)` is phenomenological; no physical origin is assumed  
-- A GO result indicates detectability under stated assumptions only  
-- Null simulations establish the noise floor; spinner simulations test recoverability  
-- Falsification tests ensure your pipeline does not detect signals at incorrect frequencies
+Each run automatically creates:
+
+simulation/runs/<RUN_ID>/
+├── run_meta.json          # full config + derived parameters
+├── alpha_sweep.csv        # numerical results
+├── snr_sweep.png          # (optional) SNR vs alpha
+└── falsification_ratio.png# (optional) wrong-frequency test
+
+All results are timestamped and reproducible.
 
 ---
 
 ## Intended Use
 
-These simulations are intended to:  
+These simulations are intended to:
 
-- Validate analysis methods  
-- Guide experimental sensitivity requirements  
-- Enable independent replication and review  
+- Validate analysis methodology
+- Guide experimental sensitivity requirements
+- Provide transparent falsification evidence
+- Enable independent replication and critique
 
-**Not intended to provide evidence for new physics.**
+They are **not** intended to demonstrate or argue for new physics.
 
 ---
 
 ## Requirements
 
-- Python 3.x  
-- `numpy`  
-- `scipy`  
-- `matplotlib` (optional, for plotting)
+- Python 3.x
+- `numpy`
+- `scipy`
+- `matplotlib` (optional, for plots)
 
 ```bash
 pip install numpy scipy matplotlib
+
+Final Note
+
+A numerical GO here only means:
+
+“If a signal of this form existed at this strength, our pipeline would detect it.”
+
+Reality is decided by Tier 1 hardware validation, not simulations.
+
+This directory exists to make sure you are not fooling yourself before touching data.
