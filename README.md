@@ -4,17 +4,24 @@
 
 Repository: `Inertia-Rebellion`
 
-## Licenses
+**Licenses**
 - **Hardware:** CERN Open Hardware Licence v2 – Permissive  
-- **Software:** MIT License  
+- **Software:** MIT License
 
 ---
 
 ## Overview
 
-**Inertia Rebellion** is an open-source experimental physics initiative focused on the **design, simulation, construction, and validation of precision torsion-based instruments** for investigating subtle inertial, gravitational, and environmental effects.
+**Inertia Rebellion** is an open-source experimental physics initiative focused on the
+design, simulation, construction, and validation of **precision torsion-based instruments**
+for investigating subtle inertial, gravitational, and environmental effects.
 
-Rather than representing a single experiment or claim, this repository serves as an **umbrella framework** for multiple independently testable research modules. Each module is developed using open-science principles and is released only after its assumptions, limitations, and validation requirements are explicitly documented.
+This repository does **not** represent a single experiment or scientific claim.
+Instead, it serves as an **umbrella framework** for multiple independently testable
+research modules developed using open-science principles.
+
+Each module is released only after its assumptions, limitations, and validation
+requirements are explicitly documented.
 
 The project emphasizes:
 
@@ -24,15 +31,21 @@ The project emphasizes:
 - Conservative, gated experimental workflows  
 - Accessibility to independent builders and reviewers  
 
-No scientific claims are made by default. All interpretation is conditional on successful validation.
+No scientific claims are made by default.  
+All interpretation is conditional on successful validation.
 
 ---
 
-## Repository Structure and Philosophy
+## Repository Philosophy
 
-This repository is organized around **modules**, each representing a self-contained experimental platform or investigation. Modules may differ in motivation, hardware, and analysis methods, but all follow the same core philosophy:
+This repository is organized around **modules**, each representing a self-contained
+experimental platform or investigation.
 
-> **We build instruments first, validate them rigorously, and only then ask physics questions.**
+All modules follow the same core principle:
+
+> **Build instruments first.  
+> Validate them rigorously.  
+> Only then ask physics questions.**
 
 Modules are expected to progress through clearly defined phases:
 
@@ -40,82 +53,79 @@ Modules are expected to progress through clearly defined phases:
 2. Numerical sensitivity and falsification studies  
 3. Hardware design and bench validation  
 4. Data collection and analysis  
-5. Interpretation and publication (if warranted)  
+5. Interpretation and publication (if warranted)
 
-At any given time, different modules may be at different phases.
-
----
-
-## Active Module: AIRM
-
-### Anisotropic Inertial Response Model
-
-The currently active module in this repository is **AIRM**, which explores whether a torsional oscillator could exhibit a **time-dependent modulation of effective inertia** correlated with controlled laboratory rotation and Earth’s sidereal motion.
-
-This module is framed explicitly as a **search and constraint experiment**, not an assertion of new physics.
+Different modules may be at different phases at any given time.
 
 ---
 
-### Phenomenological Model
+## Active Module: AIRM  
+**Anisotropic Inertial Response Model**
+
+The currently active module in this repository is **AIRM**, which explores whether a
+torsional oscillator could exhibit a time-dependent modulation of effective inertia
+correlated with controlled laboratory rotation and Earth’s sidereal motion.
+
+This module is framed explicitly as a **search and constraint experiment**,  
+**not** an assertion of new physics.
+
+---
+
+## Phenomenological Model (AIRM)
 
 The hypothesized effect is parameterized as a modulation of the effective moment of inertia:
 
-\[
-I_{\mathrm{eff}}(t) = I_0 \left[ 1 + \alpha \cos\!\left( 2\pi (f_{\mathrm{spin}} + f_{\mathrm{sid}})\, t \right) \right]
-\]
+I_eff(t) = I_0 [ 1 + α cos( 2π (f_spin + f_sid) t ) ]
 
 where:
 
-- \( I_0 \) is the nominal moment of inertia  
-- \( \alpha \) is a dimensionless coupling parameter  
-- \( f_{\mathrm{spin}} \) is the controlled rotation frequency of the apparatus  
-- \( f_{\mathrm{sid}} \) is the sidereal frequency  
+- `I_0` is the nominal moment of inertia  
+- `α` is a dimensionless coupling parameter  
+- `f_spin` is the controlled rotation frequency of the apparatus  
+- `f_sid` is the sidereal frequency  
 
 A hypothetical signal would appear at sideband frequencies:
 
-\[
-f_{\mathrm{spin}} \pm f_{\mathrm{sid}}
-\]
+f_spin ± f_sid
 
-This formulation is used solely to define **instrument sensitivity requirements and analysis targets**.
+This formulation is used **only** to define instrument sensitivity requirements and
+analysis targets.
 
 ---
 
 ## Numerical Sensitivity Studies (AIRM)
 
-A complete numerical simulation of the torsion pendulum dynamics and analysis pipeline has been performed for the AIRM module. These studies include:
+A complete numerical simulation of the torsion pendulum dynamics and analysis pipeline
+has been performed for the AIRM module. These studies include:
 
 - High-Q torsional oscillator dynamics  
 - Realistic readout noise models  
 - Phase- and quadrature-based demodulation  
 - Explicit null and falsification tests  
 
-### Representative Simulation Parameters
+**Representative simulation parameters:**
 
 - Natural oscillation period: **19.86 s**  
 - Quality factor: **Q ≈ 100,000**  
 - Integration time: **48 hours**
 
-### Simulation Outcome
+**Simulation outcome (theoretical only):**
 
-- Background frequency noise (null):
+- Background frequency noise (null) -
 
-\[
-(4.32 \pm 1.15) \times 10^{-8}\ \mathrm{Hz}
-\]
+(4.32 ± 1.15) × 10⁻⁸ Hz
 
-- Numerical sensitivity to coupling parameter:
+- Numerical sensitivity to coupling parameter: -
 
-\[
-\alpha_{\min} \lesssim 1 \times 10^{-10}
-\]
+α_min ≲ 1 × 10⁻¹⁰
 
 These results establish **theoretical sensitivity only**.  
-No physical data have been collected.
+**No physical data have been collected.**
 
-The numerical results motivate construction of validation hardware but do **not** constitute experimental constraints.
+The numerical results motivate construction of validation hardware but do **not**
+constitute experimental constraints.
 
-The full analysis code is available in:
+Full analysis code is available in:
 
 /simulation/
 
@@ -123,9 +133,10 @@ The full analysis code is available in:
 
 ## Hardware Platform: AIRM Spinner
 
-The AIRM module uses a low-cost, vacuum-compatible **torsion-balance platform**, referred to throughout the repository as the **AIRM Spinner**.
+The AIRM module uses a low-cost, vacuum-compatible torsion-balance platform referred to
+throughout the repository as the **AIRM Spinner**.
 
-### Key Subsystems
+**Key subsystems:**
 
 - **Torsion Pendulum Core**  
   Fiber-suspended asymmetric test mass  
@@ -139,9 +150,9 @@ The AIRM module uses a low-cost, vacuum-compatible **torsion-balance platform**,
 - **Isolation**  
   Compact vacuum enclosure and passive vibration control  
 
-**Estimated total system cost:** approximately **$200 USD**
+**Estimated total system cost:** ~**$200 USD**
 
-Complete build documentation, BOMs, CAD references, firmware, and validation gates are provided in:
+Complete build documentation, BOMs, firmware, and validation gates are provided in:
 
 /hardware/
 
@@ -151,13 +162,13 @@ Complete build documentation, BOMs, CAD references, firmware, and validation gat
 
 The current maturity and scope of the project are summarized in:
 
-➡️ **[STATUS.md](STATUS.md)**
+➡️ **STATUS.md**
 
 In brief:
 
-- Phase 1 — Hardware Fabrication & Bench Validation  
-- No experimental data collected  
-- No physical claims made  
+- Phase 1 — Hardware fabrication & bench validation  
+- No experimental data exist yet  
+- No physical claims are made  
 
 ---
 
@@ -175,7 +186,7 @@ In brief:
    Integration, commissioning, and controlled data runs  
 
 4. **Phase 3**  
-   Analysis, interpretation, and publication (if warranted)  
+   Analysis, interpretation, and publication (if warranted)
 
 ### Inertia Rebellion (Long-Term)
 
@@ -212,10 +223,10 @@ All software is released under the **MIT License**.
 
 If you reference the AIRM Spinner instrumentation or analysis framework, please cite:
 
-> Adam Hind  
-> *AIRM Spinner: An open-source torsion-balance platform for inertial anisotropy validation*  
-> Inertia Rebellion Project (2025)  
-> arXiv: *to be assigned*
+Adam Hind  
+*AIRM Spinner: An open-source torsion-balance platform for inertial anisotropy validation*  
+Inertia Rebellion Project (2025)  
+arXiv: *to be assigned*
 
 ---
 
@@ -223,8 +234,8 @@ If you reference the AIRM Spinner instrumentation or analysis framework, please 
 
 **Inertia Rebellion is an instrumentation-first project.**
 
-A numerical “GO” indicates that an instrument is worth building and validating —  
-not that new physics has been observed or is expected.
+A numerical “GO” indicates that an instrument is worth building and validating —
+**not** that new physics has been observed or is expected.
 
 Interpretation follows validation.  
 Validation follows construction.  
