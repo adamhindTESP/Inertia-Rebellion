@@ -116,3 +116,118 @@ No physical data have been collected.
 The numerical results motivate construction of validation hardware but do **not** constitute experimental constraints.
 
 The full analysis code is available in:
+
+/simulation/
+
+---
+
+## Hardware Platform: AIRM Spinner
+
+The AIRM module uses a low-cost, vacuum-compatible **torsion-balance platform**, referred to throughout the repository as the **AIRM Spinner**.
+
+### Key Subsystems
+
+- **Torsion Pendulum Core**  
+  Fiber-suspended asymmetric test mass  
+
+- **Angular Metrology**  
+  Optical lever (laser + photodiode)  
+
+- **Actuation and Calibration**  
+  Magnetic torque coil and controlled rotation stage  
+
+- **Isolation**  
+  Compact vacuum enclosure and passive vibration control  
+
+**Estimated total system cost:** approximately **$200 USD**
+
+Complete build documentation, BOMs, CAD references, firmware, and validation gates are provided in:
+
+/hardware/
+
+---
+
+## Project Status
+
+The current maturity and scope of the project are summarized in:
+
+➡️ **[STATUS.md](STATUS.md)**
+
+In brief:
+
+- Phase 1 — Hardware Fabrication & Bench Validation  
+- No experimental data collected  
+- No physical claims made  
+
+---
+
+## Roadmap
+
+### AIRM Module
+
+1. **Phase 0 — Complete**  
+   Theory and numerical sensitivity studies  
+
+2. **Phase 1 — Current**  
+   Hardware construction and Tier-1 validation  
+
+3. **Phase 2**  
+   Integration, commissioning, and controlled data runs  
+
+4. **Phase 3**  
+   Analysis, interpretation, and publication (if warranted)  
+
+### Inertia Rebellion (Long-Term)
+
+- Additional torsion-based sensing modules  
+- Environmental and systematic coupling studies  
+- Calibration-focused open instruments  
+- Educational and citizen-science replications  
+
+---
+
+## Contributing
+
+Contributions from scientists, engineers, makers, and students are welcome.
+
+Areas of contribution include:
+
+- **Hardware:** Replication, mechanical design, component testing  
+- **Software:** Simulation, analysis, firmware development  
+- **Theory:** Model refinement and falsification strategies  
+- **Documentation:** Tutorials, build notes, replication reports  
+
+Please review `/docs/` and open an Issue or Discussion to get started.
+
+---
+
+## Licensing and Citation
+
+All hardware designs and documentation are released under the  
+**CERN Open Hardware Licence v2 – Permissive**.
+
+All software is released under the **MIT License**.
+
+### Citation (AIRM Module)
+
+If you reference the AIRM Spinner instrumentation or analysis framework, please cite:
+
+> Adam Hind  
+> *AIRM Spinner: An open-source torsion-balance platform for inertial anisotropy validation*  
+> Inertia Rebellion Project (2025)  
+> arXiv: *to be assigned*
+
+---
+
+## Final Note
+
+**Inertia Rebellion is an instrumentation-first project.**
+
+A numerical “GO” indicates that an instrument is worth building and validating —  
+not that new physics has been observed or is expected.
+
+Interpretation follows validation.  
+Validation follows construction.  
+Construction follows careful modeling.
+
+That ordering is intentional.
