@@ -1,68 +1,85 @@
 # Project Status
 
 **Project:** Inertia Rebellion  
-**Active Module:** AIRM Spinner  
+**Active Module:** AIRM (Anisotropic Inertial Response Model)  
 **Current Phase:** Phase 1 — Hardware Fabrication & Bench Validation  
-**Latest Tagged Release:** v0.1  
-**Experimental Data:** None collected yet
+**Latest Stable Release:** v0.1  
+**Experimental Data:** None collected
 
 ---
 
 ## What Exists
 
-The following components are complete and publicly released:
+The following components are complete and publicly available:
 
-- Theoretical motivation and phenomenological framework (AIRM)
+- Theoretical motivation and phenomenological modeling (AIRM)
 - Numerical sensitivity and falsification simulations
+- End-to-end analysis pipeline (simulation-based)
 - Tier-1 hardware design, BOMs, and build documentation
-- Formal, gated hardware validation protocol
-- Firmware for rotation control, calibration torque injection, and angular readout
-- Open-source repository with versioned release (v0.1)
+- Formal hardware validation protocol and gating criteria
+- Firmware for rotation control, calibration, and angular readout
+- Open-source repository structure with versioned release (v0.1)
 
-All designs, firmware, and documentation are released as open hardware /
-open source (CERN OHL-P v2 and compatible software licenses).
+All designs, documentation, and software are released as open hardware / open source
+under CERN OHL-P v2 and MIT-compatible licenses.
 
 ---
 
 ## What Does NOT Yet Exist
 
-The following do **not** exist at this stage:
+The following do **not** exist at this time:
 
 - Physical hardware builds
 - Calibration data
-- Null datasets
-- Sidereal or rotation-modulated datasets
+- Null datasets or sidereal data
 - Any experimental measurements or constraints
-- Any claims of new physics or anomalous effects
+- Any physical interpretation or claims
+
+No real-world data have been collected for the AIRM module.
 
 ---
 
 ## Interpretation Policy
 
-No physical interpretation, anomaly discussion, or parameter constraints
-are permitted until all Tier-1 validation gates are passed on real hardware.
+No physical interpretation, anomaly discussion, or parameter constraints are permitted
+until **all Tier-1 validation gates** are passed on real hardware.
 
-This repository currently represents a **methods, instrumentation, and
-validation release only**.
+Numerical “GO” decisions in this repository indicate that:
+- the analysis pipeline is well-behaved, and
+- the instrument design is *worth constructing and validating*.
 
----
+They do **not** imply:
+- detection of an effect,
+- expectation of new physics, or
+- experimental constraints on physical models.
 
-## Intended Use
-
-At this stage, the repository is intended to support:
-
-- Independent hardware replication
-- Bench-level validation and calibration
-- End-to-end testing of analysis pipelines on real instruments
-- Transparent review of experimental assumptions
-
-It is **not** intended to support scientific claims prior to validation.
+This repository currently represents a **methods and instrumentation release only**.
 
 ---
 
-## Status Summary
+## Intended Use at This Stage
 
-> This project is in an **instrumentation-only phase**.
-> Numerical studies motivate construction; no physical results are reported.
+At its current maturity, this repository is intended for:
 
-Updates to this file will accompany future tagged releases.
+- Independent review of modeling and assumptions
+- Replication of the Tier-1 hardware platform
+- Bench validation and noise characterization
+- Educational and citizen-science instrumentation work
+- Preparation for future experimental campaigns
+
+Any progression beyond Phase 1 requires successful completion of
+the documented validation protocol.
+
+---
+
+## Change Control
+
+Significant changes to scope, interpretation policy, or experimental status
+will be reflected by:
+- a new tagged release, and
+- an update to this file.
+
+---
+
+**Last updated:** v0.1 release  
+**Status:** Instrumentation development in progress
