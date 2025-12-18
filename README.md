@@ -187,6 +187,16 @@ Additional modules may be added here or released as standalone repositories as t
 
 -----
 
+Definition of “GO” in This Repository
+
+A numerical “GO” indicates that the analysis pipeline is sufficiently sensitive
+and well-behaved to justify construction of hardware for calibration and
+validation.
+
+It does not imply that any physical anomaly is expected, predicted, or claimed.
+All physical interpretation is deferred until experimental data passes
+calibration, null, and falsification tests.
+
 ## Acknowledgments
 
 This project protocol was developed through an iterative, open design process and benefits from the broader torsion-balance and precision-measurement research community.
