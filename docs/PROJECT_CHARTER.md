@@ -1,191 +1,165 @@
-**`/docs/CHARTER.md` — Inertia Rebellion Project Charter**
+# Inertia Rebellion Project Charter
+
+**`/docs/CHARTER.md` — Governance and Scope Document**
 
 ---
 
-# Inertia Rebellion — Project Charter
+## 1. Project Mission
 
-## 1. Mission
+**Inertia Rebellion** is an open-source, citizen-science initiative to design, build, and validate a low-cost torsion-balance experiment. The goal is to **test instrument sensitivity** to hypothetical macroscopic inertial anisotropy (e.g., effects sometimes discussed in Mach-inspired or anisotropic inertia models) at a target coupling level of:
 
-**Inertia Rebellion** is an open-source, citizen-science initiative focused on the
-**design, construction, and validation of low-cost torsion-balance instrumentation**
-for precision inertial and gravitational experiments.
+\[
+\alpha \sim 1 \times 10^{-10}
+\]
 
-The project’s primary goal is to develop and validate experimental platforms
-capable of **testing sensitivity** to hypothetical macroscopic inertial anisotropy
-at the level of a dimensionless coupling parameter
-\( \alpha \sim 10^{-10} \), as motivated by Mach-inspired and related
-phenomenological models.
+This project emphasizes **instrumentation-first science**, using pre-registered protocols, open hardware and software, and community review.
 
-This project is **instrumentation-first**:
-
-- No physical effects are assumed to exist  
-- No discovery claims are made by default  
-- All interpretation is conditional on successful validation  
-
-Scientific rigor is promoted through pre-registered analysis protocols,
-open hardware and software, and transparent community collaboration.
+No claim is made regarding the existence of new physics.
 
 ---
 
-## 2. Phenomenological Modeling Context
+## 2. Theory Summary
 
-To define instrument requirements and analysis targets, the system is modeled
-using a **phenomenological torsional oscillator framework**.
-
-The angular dynamics are written as:
+The torsional system is modeled as a damped harmonic oscillator with a time-dependent effective inertia:
 
 \[
 I_0 \left[ 1 + \epsilon(t) \right] \ddot{\theta}(t)
-+ \gamma \dot{\theta}(t)
-+ \kappa \theta(t)
-= \tau_{\mathrm{ext}}(t)
+\;+\;
+\gamma \, \dot{\theta}(t)
+\;+\;
+\kappa \, \theta(t)
+\;=\;
+\tau_{\mathrm{ext}}(t)
 \]
 
-where the hypothetical modulation is parameterized as:
+where the fractional inertia modulation is parameterized as:
 
 \[
 \epsilon(t) = \alpha \cos\!\left( 2\pi f_{\mathrm{target}} t \right)
 \]
 
-Equivalently, this can be expressed as an effective moment of inertia:
+Here:
+
+- \( I_0 \) is the nominal moment of inertia  
+- \( \theta(t) \) is the angular displacement  
+- \( \gamma \) is the damping coefficient  
+- \( \kappa \) is the torsion constant  
+- \( \tau_{\mathrm{ext}}(t) \) represents external torques  
+
+To first order, this modulation produces a fractional shift in the resonant frequency:
 
 \[
-I_{\mathrm{eff}}(t) = I_0 \left[ 1 + \alpha \cos\!\left( 2\pi f_{\mathrm{target}} t \right) \right]
+\frac{\Delta \omega_0^2}{\omega_0^2} \;\approx\; -\,\epsilon(t)
 \]
 
-In this phenomenological model, the coupling parameter \( \alpha \) produces a
-fractional modulation of the resonant frequency:
-
-\[
-\frac{\Delta \omega_0^2}{\omega_0^2} \approx -\epsilon(t)
-\]
-
-These expressions are used **solely** to:
-
-- Establish instrument sensitivity requirements  
-- Define null and falsification tests  
-- Guide numerical simulations  
-
-They do **not** constitute an assumed physical theory.
+This formulation is used **only** to define sensitivity requirements and analysis targets.
 
 ---
 
 ## 3. Scope and Objectives
 
-### In Scope
+### Project Phases
 
-- **Phase 0 — Complete**  
-  Phenomenological modeling, numerical sensitivity studies, falsification analysis
+- **Phase 0 — Theory & Simulation (Complete)**  
+  Development of the Anisotropic Inertial Response Model (AIRM), numerical sensitivity studies, and falsification checks.
 
-- **Phase 1 — Current**  
-  Hardware fabrication, subsystem testing, and Tier-1 validation of the
-  *AIRM Spinner* apparatus, including publication of BOMs, CAD files,
-  firmware, and validation gates
+- **Phase 1 — Hardware Fabrication & Bench Validation (Current)**  
+  Construction and validation of the **AIRM Spinner** apparatus.  
+  Publication of BOMs, wiring, firmware, and validation protocols.
 
-- **Phase 2 — Future**  
-  Commissioning, controlled data runs, and systematic characterization
+- **Phase 2 — Experimental Operation**  
+  Commissioning, null tests, and controlled modulation runs.
 
-- **Phase 3 — Conditional**  
-  Analysis, documentation, and dissemination of results  
-  (including null results, if applicable)
+- **Phase 3 — Analysis & Iteration**  
+  Analysis, interpretation (if warranted), and design refinement.
 
 ### Explicitly Out of Scope
 
-- Claims of discovery or new physics  
-- High-cost or proprietary vacuum systems  
-- Non-torsional experimental approaches  
-- Interpretation prior to successful validation  
+- Claims of discovery  
+- High-cost or institutional vacuum systems  
+- Non-torsion-based experimental methods  
 
 ---
 
-## 4. Assumptions, Risks, and Mitigation
+## 4. Key Assumptions and Risks
 
-### Key Assumptions
+### Assumptions
 
-- High-Q torsional operation is achievable using low-cost components  
-- Optical lever angular sensitivity of order  
-  \( 10^{-8}\,\mathrm{rad} \) is practical  
-- Sidereal-frequency sidebands can be distinguished from dominant systematics  
+- High-Q torsional behavior can be achieved at low cost  
+- Optical lever sensitivity of order \( 10^{-8} \,\mathrm{rad} \) is feasible  
+- Sidereal-frequency signals can be distinguished from systematics  
 
-### Principal Risks
+### Risks
 
 - Environmental noise exceeding modeled levels  
 - Fabrication tolerances limiting achievable quality factor  
-- Systematic couplings mimicking target modulation frequencies  
+- Null results reducing community engagement  
 
-### Mitigation Strategies
+### Mitigations
 
-- Pre-registered analysis and falsification protocols  
-- Explicit null tests and off-target frequency checks  
-- Modular hardware design to support iteration  
-- Open community review and replication  
+- Pre-registered analysis protocols (e.g., OSF / Zenodo)  
+- Modular, upgradeable hardware design  
+- Explicit acceptance of null results as valid outcomes  
 
 ---
 
-## 5. Governance and Contributions
+## 5. Governance and Contribution Model
 
 - **Project Lead:** Adam Hind (`adamhindTESP`)
-- **Decision Process:**  
+- **Decision Making:**  
   Open discussion via GitHub Issues and Discussions  
-  Major changes require pull requests and review
-
+- **Major Changes:**  
+  Require review via pull request
 - **Code of Conduct:**  
-  Governed by `CODE_OF_CONDUCT.md`
+  Contributor Covenant (see `CODE_OF_CONDUCT.md`)
 
-- **Contributions Welcome In:**  
-  - Hardware replication and testing  
-  - Simulation and analysis tools  
-  - Theory refinement and falsification proposals  
-  - Documentation and educational material  
-
-Contributors are encouraged to review this charter and the `/docs/` directory
-before participating.
+Contributions are welcome in hardware replication, firmware, simulation, theory refinement, and documentation.
 
 ---
 
-## 6. Milestones (Indicative)
+## 6. Milestones and Timeline
 
-- **Phase 0:** Modeling and numerical sensitivity analysis — *complete*  
-- **Phase 1:** Hardware fabrication and bench validation — *in progress*  
-- **Phase 2:** Commissioning and controlled measurements — *future*  
-- **Phase 3:** Analysis and dissemination — *conditional*  
+- **Phase 0:** Theory & simulation — *Complete (Dec 2025)*  
+- **Phase 1:** Hardware validation — *Jan–Feb 2026*  
+- **Phase 2:** Data collection — *Mar–Apr 2026*  
+- **Phase 3:** Analysis & publication — *May 2026+*
 
-Timelines are intentionally flexible and depend on validation outcomes.
+Dates are aspirational and may shift based on validation outcomes.
 
 ---
 
-## 7. Resources and Infrastructure
+## 7. Resources
 
-- **Target Budget:** ~\$200 USD for Tier-1 apparatus  
-- **Collaboration Platform:** GitHub  
-- **Preprint Platform:** arXiv  
+- **Estimated Budget:** ~$200 USD (Tier-1 build)
+- **Collaboration Platform:** GitHub
+- **Preprint Archive:** arXiv
 - **Licensing:**  
   - Hardware: CERN Open Hardware Licence v2 – Permissive  
   - Software: MIT License  
 
 ---
 
-## 8. Success Criteria
+## 8. Success Metrics
 
-Success is defined by **methodological clarity and reproducibility**, not by
-positive results.
-
-Key indicators include:
-
-1. **Simulation Validation**  
-   Demonstrated numerical sensitivity to  
-   \( \alpha \lesssim 10^{-10} \)
+1. **Simulation GO/NO-GO**  
+   Demonstrated numerical sensitivity of  
+   \[
+   \alpha_{\min} \le 1 \times 10^{-10}
+   \]
+   in a 48-hour simulated integration.
 
 2. **Experimental Validation**  
-   Measured noise floors consistent with modeled limits
+   Measured noise floor at the target frequency consistent with simulation.
 
-3. **Reproducibility**  
-   Independent replication or validation attempts by external builders
+3. **Replication**  
+   At least **5 independent replication or validation attempts**.
 
 4. **Dissemination**  
-   Public release of methods, results (including nulls), and lessons learned
+   Open-access arXiv preprint or journal publication (results or nulls).
 
 ---
+
+## Sign-off
 
 **Signed:** Adam Hind  
 **Role:** Project Lead  
