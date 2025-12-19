@@ -1,274 +1,304 @@
-# AIRM Spinner — Tier-1 Validation Hardware
+# Firmware — AIRM Spinner Control & Data Logging
 
-This directory defines a **buildable torsion-balance apparatus** for the Inertia Rebellion project.  
-The Tier-1 build is explicitly intended for **calibration, noise characterization, and validation of the full analysis pipeline**.
+**/firmware/README.md — AIRM Spinner Firmware Documentation**
 
-A numerical or simulation **“GO”** means this hardware is worth constructing for controlled measurement.
+This document describes the **firmware architecture, scope, and guarantees**
+used to operate the AIRM Spinner torsion-balance apparatus.
 
-It does **not** imply:
-- the existence of an anomaly
-- an expectation of new physics
-- a claim of anisotropic inertia
+The firmware is intentionally minimal.  
+Its role is **deterministic I/O control and transparent data logging**, not signal interpretation.
 
-All physical interpretation is deferred until real data passes calibration, null, and falsification tests.
+All physics analysis is performed offline.
 
----
-
-## Scope of This Build (Tier-1)
-
-The Tier-1 apparatus is designed to answer one question only:
-
-> **“Are we measuring what we think we are measuring?”**
-
-Specifically, Tier-1 enables:
-
-- Verification of angular readout sensitivity
-- Measurement of torsion constant \( \kappa \) and damping \( Q \)
-- Injection and recovery of known calibration torques
-- Long-duration null data collection
-- End-to-end testing of the analysis pipeline on real hardware
+See [`InertiaSpinner.ino`](InertiaSpinner.ino) for the complete source code.
 
 ---
 
-## Directory Contents
+## 1. Firmware Role in the Experiment
 
-hardware/
-├── README.md                ← this file (build + integration guide)
-├── Validation.md            ← validation gates and criteria
-├── spinner_schematics.html  ← full wiring & circuit schematics (printable)
+The firmware performs four essential tasks:
 
----
+1. **Impose controlled rotation** at a known modulation frequency (`f_spin`)
+2. **Read angular displacement** from the optical lever
+3. **Inject calibration torques** on command
+4. **Log raw data** continuously for offline analysis
 
-## Hardware Architecture (Summary)
+The firmware explicitly does **not**:
 
-- **Control & Logging**: Arduino Uno / Nano
-- **Rotation**: NEMA-17 stepper via A4988 / DRV8825
-- **Angular Readout**: Optical lever (laser + photodiode)
-- **Calibration**: Magnetic torque coil (MOSFET-driven)
-- **Data Output**: 1 Hz CSV over USB serial
+- Filter data  
+- Demodulate signals  
+- Estimate frequencies  
+- Perform statistical tests  
+- Make GO / NO-GO decisions  
 
-Full wiring diagrams and pinouts are provided in  
-➡️ **`spinner_schematics.html`**
+The firmware may perform **minimal sanity checks only**, such as:
 
----
+- ADC range clamping  
+- Counter overflow handling  
+- Basic fault flags  
 
-## Bill of Materials (Tier-1)
+It never transforms or enhances the physics signal beyond
+**digitization, timestamping, and framing**.
 
-### A. Control & Computation
+This separation ensures:
 
-| Item | Specification | Qty |
-|-----|---------------|-----|
-| Arduino Uno R3 | ATmega328P, USB | 1 |
-| USB Cable | USB-A ↔ USB-B | 1 |
-
-### B. Motion / Spin System
-
-| Item | Specification | Qty |
-|-----|---------------|-----|
-| Stepper Motor | NEMA-17, 200 steps/rev | 1 |
-| Stepper Driver | A4988 or DRV8825 (with heatsink) | 1 |
-| External PSU | 12 V, ≥ 2 A | 1 |
-
-### C. Optical Lever Readout
-
-| Item | Specification | Qty |
-|-----|---------------|-----|
-| Laser Diode Module | 650 nm, 5 mW, 5 V (Class 3R) | 1 |
-| Photodiode | BPW34 | 1 |
-| Resistor | 330 Ω, ¼ W | 1 |
-| Resistor | 10 kΩ, ¼ W | 1 |
-| Capacitor | 10 nF ceramic | 1 |
-| Mirror | Small, front-surface | 1 |
-
-### D. Calibration / Actuation
-
-| Item | Specification | Qty |
-|-----|---------------|-----|
-| MOSFET | IRLZ44N (logic-level) | 1 |
-| Flyback Diode | 1N4007 | 1 |
-| Magnet Wire | 28 AWG (~10 m) | 1 |
-| NdFeB Magnet | ~1 g | 1 |
-
-### E. Mechanical (Reference Components)
-
-| Item | Specification | Notes |
-|-----|---------------|------|
-| **Torsion Fiber (Starter)** | 0.1 mm polymer fishing line | Low-Q, beginner friendly |
-| **Torsion Fiber (Precision)** | 25–50 µm tungsten | High-Q upgrade |
-| Rotation Stage | Manual or motor-coupled | 1:1 coupling |
-| Frame | Rigid, non-magnetic | Aluminum / composite |
-| Breadboard / Perfboard | — | Prototyping |
-| Jumper Wires | Male–male | ~20 |
-
-**Cost (Tier-1):**  
-- Electronics + starter fiber: **~$85 USD**  
-- Precision fiber upgrade: **+ $30–50**
+- Full auditability  
+- Reversible data processing  
+- No hidden signal conditioning  
+- Independent reanalysis by third parties  
 
 ---
 
-## Tools Required
+## 2. Hardware Assumptions & Versioning
 
-- Soldering iron and solder  
-- Digital multimeter (DMM)  
-- Wire cutters / strippers  
-- Small screwdrivers / hex keys  
-- Computer with USB port  
+The firmware assumes the following hardware, which is part of the
+**experimental definition**:
 
----
+- MCU: Arduino Uno or Nano (ATmega328P)
+- Logic level: 5 V
+- ADC resolution: 10-bit
+- External 12 V supply for motor and calibration coil
 
-## Recommended Build Order
-
-### Phase 0 — Electronics Bring-Up (No Mechanics)
-
-**Goal:** Verify firmware and electronics in isolation.
-
-1. Flash Arduino with spinner firmware
-2. Verify USB serial output
-3. Wire stepper driver + motor
-4. Set driver current limit (see below)
-5. Verify smooth rotation at target speed
-6. Confirm common ground between 5 V and 12 V rails
-
-**STOP** if vibration, missed steps, or overheating occur.
+Any port to a different MCU, voltage rail, or timing source **must be treated
+as a new firmware version** and documented alongside the data.
 
 ---
 
-### Phase 1 — Optical Readout Validation
+## 3. Rotation Control
 
-**Goal:** Verify angular sensing without interpretation.
+### 3.1 Rotation Strategy
 
-1. Rigidly mount laser and photodiode
-2. Align beam to photodiode center
-3. Record ADC value at rest (~512 typical)
-4. Manually deflect mirror → verify linear response
-5. Record short runs to estimate noise floor
+Rotation is implemented using:
 
----
+- Open-loop stepper control  
+- Fixed step-interval scheduling  
+- No encoder or closed-loop feedback  
 
-### Phase 2 — Calibration Coil Verification
-
-**Goal:** Verify known-torque injection.
-
-1. Wind calibration coil (~500 turns)
-2. Wire coil, MOSFET, and flyback diode
-3. Trigger PWM pulse (`C` command)
-4. Observe transient in optical signal
-5. Confirm repeatability
+The goal is not precise angular positioning, but
+**stable, slow, repeatable modulation**.
 
 ---
 
-### Phase 3 — Mechanical Integration
+### 3.2 Typical Configuration (Parameterizable)
 
-**Goal:** Integrate torsion system conservatively.
+Typical default configuration (set via firmware constants):
 
-1. Suspend torsion fiber
-2. Mount mirror and test magnet
-3. Attach rotation stage (1:1 coupling)
-4. Verify free oscillation
-5. Measure natural frequency \( f_0 \) and \( Q \)
-6. Compare measured values to simulation inputs
+- Motor: 200 steps per revolution  
+- Microstepping: Full-step (configurable)  
+- Step interval: 1 step per second (configurable)  
+- Effective rotation frequency:  
+  `f_spin ≈ 0.001 Hz` (default)
 
----
-
-### Phase 4 — Long-Duration Validation Runs
-
-**Goal:** Produce data suitable for pipeline testing.
-
-1. Run spinner at configured \( f_{\mathrm{spin}} \)
-2. Collect ≥ 24–48 hours of continuous data
-3. Inject calibration pulses periodically
-4. Run full analysis pipeline on real data
+Only the **parameters** are adjustable; the **conceptual approach**
+(slow, open-loop modulation) is fixed.
 
 ---
 
-## Stepper Driver Current Limit (Critical)
+### 3.3 Timing Model
 
-**Most common failure mode.**
+Stepper timing is driven by:
 
-**Procedure (A4988 / DRV8825):**
+- `millis()`-based scheduling  
+- Deterministic main-loop execution  
 
-1. Disconnect stepper motor
-2. Power driver with 12 V
-3. Set DMM to DC volts
-4. Black probe → GND
-5. Red probe → Vref potentiometer
-6. Adjust until **Vref ≈ 0.4 V**
-7. Power off, reconnect motor
+This timing model is sufficient to:
 
-- Too high → vibration, heat  
-- Too low → missed steps  
+- Establish a known modulation timescale  
+- Enable offline phase tracking  
+
+It is **not** intended to provide ppm-level frequency stability or clock discipline.
 
 ---
 
-## Common Failure Modes
+## 4. Optical Lever Readout
 
-| Symptom | Likely Cause | Fix |
-|------|-------------|----|
-| Stepper vibrates | Current limit wrong | Reset Vref |
-| No rotation | ENABLE pin floating | Tie ENABLE → GND |
-| Jerky motion | Speed too high | Reduce steps/s |
-| ADC stuck at 0 or 1023 | Photodiode reversed | Swap polarity |
-| No coil response | Wrong MOSFET | Use IRLZ-series |
+### 4.1 ADC Sampling
 
-If multiple issues appear, revert to **Phase 0**.
+- Signal source: Photodiode voltage divider  
+- ADC reference: Arduino 5 V rail  
+- ADC resolution: 10-bit (0–1023)  
+- Sampling rate: 1 Hz (default)
 
----
+Each sample is tagged with a **millisecond-resolution timestamp** using `millis()`.
 
-## Tier-1 Validation Criteria
+No attempt is made to:
 
-- Optical noise floor ≲ \(10^{-8}\,\mathrm{rad}/\sqrt{\mathrm{Hz}}\) (order-of-magnitude)
-- Null runs show no coherent peak at \( f_{\mathrm{target}} \)
-- Calibration injections recovered with correct phase and scaling
-- Wrong-frequency analysis yields false/true < 0.1
-
-See **`Validation.md`** for formal gate definitions.
+- Discipline the clock  
+- Correct drift  
+- Apply filtering or gain correction  
 
 ---
 
-## Explicit Non-Goals
+### 4.2 Signal Characteristics
 
-This build does **not** aim to:
+Typical operating behavior after alignment:
 
-- demonstrate anisotropic inertia
-- detect new physics
-- produce publishable anomalies
+- Resting midpoint: ~512 ADC counts  
+- Dynamic range: ±100 counts (geometry-dependent)
 
-It exists solely to validate the **instrument + analysis chain**.
+The firmware does not:
 
----
+- Zero the signal  
+- Track baseline drift  
+- Normalize or scale readings  
 
-## Gate to Next Tier
-
-Progress beyond Tier-1 requires:
-
-- stable noise characterization
-- reproducible calibration response
-- agreement between measurement and simulation
-- successful falsification tests on real data
-
-Only after these conditions are met should physical interpretation be attempted.
+Calibration is performed via injected torque and handled offline.
 
 ---
 
-## Builder Skill Expectations
+## 5. Magnetic Calibration Control
 
-| Skill Level | Outcome |
-|-----------|--------|
-| Expert maker | Smooth build |
-| Arduino hobbyist | Successful with this guide |
-| Beginner citizen scientist | Successful with patience |
-| Complete novice | Not recommended (yet) |
+### 5.1 Purpose
+
+The magnetic calibration coil provides:
+
+- Known, repeatable torque impulses  
+- Validation of mechanical response  
+- A safeguard against false positives  
+
+Every credible signal must be interpretable relative to injected
+calibration behavior.
 
 ---
 
-## Final Note
+### 5.2 Control Method
 
-> **Accessibility improves replicability, not claims.**
+- Output: PWM-capable digital pin  
+- Driver: Logic-level MOSFET  
+- Pulse duration: ~100 ms (typical)  
+- Duty cycle: Configurable  
 
-A successful Tier-1 build means:
+Calibration pulses may be issued manually via serial command.
 
-> *“We are measuring what we think we are measuring.”*
+---
 
-Nothing more — and nothing less.
+### 5.3 Data Alignment
 
-**Tier-1 hardware is ready for distributed replication.**
+Each calibration pulse is logged with:
+
+- A timestamp  
+- A calibration flag in the data stream  
+
+This allows injected torques to be aligned precisely with the
+optical-lever response during offline analysis.
+
+---
+
+## 6. Serial Data Logging
+
+### 6.1 Output Format
+
+The firmware outputs **one CSV line per sample** over USB serial.
+
+Default field order:
+
+timestamp_ms, adc_raw, step_count, cal_flag
+
+Field definitions:
+
+- `timestamp_ms`  
+  Unsigned 32-bit integer, milliseconds since MCU reset  
+
+- `adc_raw`  
+  Raw ADC count (0–1023)  
+
+- `step_count`  
+  Cumulative motor step index (wraparound permitted)  
+
+- `cal_flag`  
+  `0` = normal sample  
+  `1` = within calibration pulse window  
+
+By default:
+
+- No header row is emitted  
+- Output is ASCII CSV  
+- One line corresponds to one sample  
+
+This format is human-readable, script-friendly, and robust against dropped lines.
+
+---
+
+### 6.2 Sampling Philosophy
+
+A 1 Hz logging rate was chosen to:
+
+- Match simulation assumptions  
+- Minimize serial bottlenecks  
+- Avoid implicit filtering  
+
+Higher sampling rates are possible but not required for the current
+analysis pipeline.
+
+---
+
+## 7. Command Interface
+
+The firmware supports a minimal serial command set:
+
+| Command | Action |
+|--------|--------|
+| `C` | Inject calibration torque pulse |
+| `S` | Report system status |
+
+Commands are optional, non-blocking, and logged.
+
+No command modifies:
+
+- Rotation frequency  
+- ADC scaling  
+- Logging format  
+
+This preserves experiment repeatability.
+
+---
+
+## 8. Error Handling & Known Limitations
+
+The firmware:
+
+- Does not detect missed motor steps  
+- Does not measure coil current  
+- Does not provide absolute time synchronization  
+
+These limitations are intentional and documented.
+
+Failures are designed to be **visible in the data**, not silently corrected.
+
+---
+
+## 9. Relation to Other Project Components
+
+- Hardware design → `/hardware/`  
+- Validation protocol → `/hardware/Validation.md`  
+- Simulation assumptions → `/simulation/`  
+- Data analysis → `/analysis/`  
+
+Firmware behavior is explicitly aligned with simulation parameters
+(sampling rate, modulation timescale).
+
+---
+
+## 10. Design Guarantees
+
+- Firmware does not generate or enhance physics signals  
+- All transformations are reversible from the serial data log  
+- Any change to timing, motor control, or ADC behavior increments the
+  firmware version and must be recorded with the data  
+
+---
+
+## Status
+
+| Component | Status |
+|---------|--------|
+| Rotation control | ✅ Validated |
+| Data logging | ✅ Validated |
+| Calibration interface | ✅ Validated |
+
+No “smart” features are planned.
+
+---
+
+> **Design principle:**  
+> *If the firmware looks boring, it is working correctly.*
