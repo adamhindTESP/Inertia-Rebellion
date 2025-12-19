@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+
+title: "Inertia Rebellion: Open-Source Instrumentation for Precision Inertial Experiments"
+
+message: >
+  If you use this repository, the AIRM Spinner hardware, or the associated
+  simulation and analysis framework, please cite this work.
+
+authors:
+  - family-names: Hind
+    given-names: Adam
+    affiliation: Independent Researcher
+
+version: 0.1.0
+
+date-released: 2025-12-18
+
+licenses:
+  - CERN-OHL-P-2.0
+  - MIT
+
+repository-code: https://github.com/adamhindTESP/Inertia-Rebellion/releases/tag/v0.1
+
+abstract: >
+  Inertia Rebellion is an open-source experimental physics initiative focused on
+  the design, simulation, construction, and validation of precision torsion-based
+  instruments for investigating subtle inertial, gravitational, and environmental
+  effects. This repository serves as an umbrella framework for multiple modular
+  instrumentation efforts. The current release documents theoretical motivation,
+  numerical sensitivity studies, hardware design, firmware, and validation protocols
+  only. No experimental data or physical claims are reported.
+
+keywords:
+  - torsion balance
+  - precision instrumentation
+  - inertial sensing
+  - open hardware
+  - experimental physics
+  - citizen science
+  - anisotropic inertia
+
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Hind
+      given-names: Adam
+  title: "AIRM Spinner: An Open-Source Torsion-Balance Platform for Inertial Anisotropy Validation"
+  journal: "Inertia Rebellion Project"
+  year: 2025
+  notes: "Instrumentation and validation framework; no experimental data reported"
