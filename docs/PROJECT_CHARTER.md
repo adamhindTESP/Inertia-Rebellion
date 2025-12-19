@@ -35,7 +35,7 @@ I_0 \left[ 1 + \epsilon(t) \right] \ddot{\theta}(t)
 where the fractional inertia modulation is parameterized as:
 
 \[
-\epsilon(t) = \alpha \cos\!\left( 2\pi f_{\mathrm{target}} t \right)
+\epsilon(t) = \alpha \cos\!\left( 2\pi f_{\mathrm{target}} \, t \right)
 \]
 
 Here:
@@ -86,7 +86,11 @@ This formulation is used **only** to define sensitivity requirements and analysi
 ### Assumptions
 
 - High-Q torsional behavior can be achieved at low cost  
-- Optical lever sensitivity of order \( 10^{-8} \,\mathrm{rad} \) is feasible  
+- Optical lever sensitivity of order  
+  \[
+  10^{-8}\,\mathrm{rad}
+  \]
+  is feasible  
 - Sidereal-frequency signals can be distinguished from systematics  
 
 ### Risks
@@ -107,7 +111,7 @@ This formulation is used **only** to define sensitivity requirements and analysi
 
 - **Project Lead:** Adam Hind (`adamhindTESP`)
 - **Decision Making:**  
-  Open discussion via GitHub Issues and Discussions  
+  Open discussion via GitHub Issues and Discussions
 - **Major Changes:**  
   Require review via pull request
 - **Code of Conduct:**  
