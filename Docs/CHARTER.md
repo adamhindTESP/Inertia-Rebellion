@@ -1,6 +1,6 @@
 # Inertia Rebellion Project Charter
 
-**/docs/CHARTER.md — Governance and Scope Document**
+**/Docs/CHARTER.md — Governance and Scope Document**
 
 ---
 
