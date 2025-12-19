@@ -1,18 +1,22 @@
 # Inertia Rebellion Project Charter
 
-**`/docs/CHARTER.md` — Governance and Scope Document**
+**/docs/CHARTER.md — Governance and Scope Document**
 
 ---
 
 ## 1. Project Mission
 
-**Inertia Rebellion** is an open-source, citizen-science initiative to design, build, and validate a low-cost torsion-balance experiment. The goal is to **test instrument sensitivity** to hypothetical macroscopic inertial anisotropy (e.g., effects sometimes discussed in Mach-inspired or anisotropic inertia models) at a target coupling level of:
+**Inertia Rebellion** is an open-source, citizen-science initiative to design, build, and
+validate a low-cost torsion-balance experiment. The goal is to test **instrument
+sensitivity** to hypothetical macroscopic inertial anisotropy (e.g., effects sometimes
+discussed in Mach-inspired or anisotropic inertia models) at a target coupling level of:
 
-\[
+$$
 \alpha \sim 1 \times 10^{-10}
-\]
+$$
 
-This project emphasizes **instrumentation-first science**, using pre-registered protocols, open hardware and software, and community review.
+This project emphasizes **instrumentation-first science**, using pre-registered
+protocols, open hardware and software, and community review.
 
 No claim is made regarding the existence of new physics.
 
@@ -20,9 +24,10 @@ No claim is made regarding the existence of new physics.
 
 ## 2. Theory Summary
 
-The torsional system is modeled as a damped harmonic oscillator with a time-dependent effective inertia:
+The torsional system is modeled as a damped harmonic oscillator with a time-dependent
+effective inertia:
 
-\[
+$$
 I_0 \left[ 1 + \epsilon(t) \right] \ddot{\theta}(t)
 \;+\;
 \gamma \, \dot{\theta}(t)
@@ -30,29 +35,30 @@ I_0 \left[ 1 + \epsilon(t) \right] \ddot{\theta}(t)
 \kappa \, \theta(t)
 \;=\;
 \tau_{\mathrm{ext}}(t)
-\]
+$$
 
-where the fractional inertia modulation is parameterized as:
+The fractional inertia modulation is parameterized as:
 
-\[
-\epsilon(t) = \alpha \cos\!\left( 2\pi f_{\mathrm{target}} \, t \right)
-\]
+$$
+\epsilon(t) = \alpha \cos\!\left( 2\pi f_{\mathrm{target}}\, t \right)
+$$
 
-Here:
+Where:
 
-- \( I_0 \) is the nominal moment of inertia  
-- \( \theta(t) \) is the angular displacement  
-- \( \gamma \) is the damping coefficient  
-- \( \kappa \) is the torsion constant  
-- \( \tau_{\mathrm{ext}}(t) \) represents external torques  
+- $I_0$ is the nominal moment of inertia  
+- $\theta(t)$ is the angular displacement  
+- $\gamma$ is the damping coefficient  
+- $\kappa$ is the torsion constant  
+- $\tau_{\mathrm{ext}}(t)$ represents external torques  
 
 To first order, this modulation produces a fractional shift in the resonant frequency:
 
-\[
-\frac{\Delta \omega_0^2}{\omega_0^2} \;\approx\; -\,\epsilon(t)
-\]
+$$
+\frac{\Delta \omega_0^2}{\omega_0^2} \approx -\,\epsilon(t)
+$$
 
-This formulation is used **only** to define sensitivity requirements and analysis targets.
+This formulation is used **only** to define sensitivity requirements and analysis
+targets.
 
 ---
 
@@ -61,7 +67,8 @@ This formulation is used **only** to define sensitivity requirements and analysi
 ### Project Phases
 
 - **Phase 0 — Theory & Simulation (Complete)**  
-  Development of the Anisotropic Inertial Response Model (AIRM), numerical sensitivity studies, and falsification checks.
+  Development of the Anisotropic Inertial Response Model (AIRM), numerical sensitivity
+  studies, and falsification checks.
 
 - **Phase 1 — Hardware Fabrication & Bench Validation (Current)**  
   Construction and validation of the **AIRM Spinner** apparatus.  
@@ -86,11 +93,14 @@ This formulation is used **only** to define sensitivity requirements and analysi
 ### Assumptions
 
 - High-Q torsional behavior can be achieved at low cost  
-- Optical lever sensitivity of order  
-  \[
-  10^{-8}\,\mathrm{rad}
-  \]
-  is feasible  
+- Optical lever sensitivity of order
+
+$$
+10^{-8}\ \mathrm{rad}
+$$
+
+is feasible  
+
 - Sidereal-frequency signals can be distinguished from systematics  
 
 ### Risks
@@ -117,7 +127,8 @@ This formulation is used **only** to define sensitivity requirements and analysi
 - **Code of Conduct:**  
   Contributor Covenant (see `CODE_OF_CONDUCT.md`)
 
-Contributions are welcome in hardware replication, firmware, simulation, theory refinement, and documentation.
+Contributions are welcome in hardware replication, firmware, simulation, theory
+refinement, and documentation.
 
 ---
 
@@ -145,18 +156,20 @@ Dates are aspirational and may shift based on validation outcomes.
 
 ## 8. Success Metrics
 
-1. **Simulation GO/NO-GO**  
-   Demonstrated numerical sensitivity of  
-   \[
-   \alpha_{\min} \le 1 \times 10^{-10}
-   \]
-   in a 48-hour simulated integration.
+1. **Simulation GO / NO-GO**  
+   Demonstrated numerical sensitivity of:
+
+$$
+\alpha_{\min} \le 1 \times 10^{-10}
+$$
+
+in a 48-hour simulated integration.
 
 2. **Experimental Validation**  
    Measured noise floor at the target frequency consistent with simulation.
 
 3. **Replication**  
-   At least **5 independent replication or validation attempts**.
+   At least **five independent replication or validation attempts**.
 
 4. **Dissemination**  
    Open-access arXiv preprint or journal publication (results or nulls).
