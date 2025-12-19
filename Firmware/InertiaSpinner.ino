@@ -36,8 +36,8 @@ void setup() {
   stepper.setMaxSpeed(1000.0);
   stepper.setSpeed(target_speed_sps);
 
-  // CSV header (optional but recommended)
-  Serial.println("timestamp_ms,adc_raw,step_count,cal_flag");
+  // CSV header (matches firmware README)
+  Serial.println("Time_ms,Theta_ADC,Status");
 }
 
 void loop() {
@@ -65,17 +65,11 @@ void loop() {
   if (now - last_log_ms >= log_interval_ms) {
     const int adc_raw = analogRead(PHOTO_ANALOG_PIN);
 
-    // stepper.currentPosition() increments as steps are issued by AccelStepper
-    const long step_count = stepper.currentPosition();
-    const int cal_flag = cal_active ? 1 : 0;
-
     Serial.print(now);
     Serial.print(",");
     Serial.print(adc_raw);
     Serial.print(",");
-    Serial.print(step_count);
-    Serial.print(",");
-    Serial.println(cal_flag);
+    Serial.println("OK");  // Status field
 
     last_log_ms = now;
   }
