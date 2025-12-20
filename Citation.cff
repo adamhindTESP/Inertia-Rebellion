@@ -20,7 +20,7 @@ licenses:
   - CERN-OHL-P-2.0
   - MIT
 
-repository-code: https://github.com/adamhindTESP/Inertia-Rebellion/releases/tag/v0.1
+repository-code: https://github.com/adamhindTESP/Inertia-Rebellion/releases/tag/v1.0.0
 
 abstract: >
   Inertia Rebellion (AIRM) is an open-source citizen science initiative
@@ -56,7 +56,7 @@ preferred-citation:
   journal: "Inertia Rebellion Project (Tier-1 Methods Release)"
   year: 2025
   month: 12
-  url: https://github.com/adamhindTESP/Inertia-Rebellion/releases/tag/v0.1
+  url: https://github.com/adamhindTESP/Inertia-Rebellion/releases/tag/v1.0.0
   notes: >
     Pre-registered methods-only release.
     Hardware unbuilt and uncharacterized.
