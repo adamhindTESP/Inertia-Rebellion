@@ -118,16 +118,11 @@ The same pipeline is applied to both null and signal‑injected simulations.[1]
 3. Perform quadrature (IQ) demodulation at the natural frequency $$f_0$$  
 4. Low‑pass filter the I/Q channels to isolate slow phase evolution  
 5. Unwrap the phase and remove linear trends  
-6. Convert phase slope to instantaneous frequency deviation:  
-   $$
-   \delta f(t) = \frac{1}{2\pi} \frac{d\phi}{dt}
-   $$  
-7. Estimate recovered signal amplitude using coherent projection (matched filtering) at the **target frequency**  
-   $$
-   f_\text{target} = f_\text{spin} + f_\text{sid}
-   $$
-[1]
-
+6. Convert phase slope to instantaneous frequency deviation using  
+   δf(t) = (1 / 2π) · dφ/dt.  
+7. Estimate recovered signal amplitude using coherent projection
+   (matched filtering) at the target frequency  
+   f_target = f_spin + f_sid.
 ***
 
 ## 6. Null and Falsification Tests
