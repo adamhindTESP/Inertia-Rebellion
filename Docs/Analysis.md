@@ -1,246 +1,167 @@
-# Analysis — Signal Extraction, Demodulation, and Null Tests
+# Analysis — Signal Extraction, Demodulation, and Null Tests (Tier-1)
 
-This document defines the **exact analysis pipeline** used to extract candidate AIRM signals from raw torsion-pendulum data and to reject false positives through predefined null tests.
+This document defines the **authoritative Tier-1 analysis pipeline** for the Inertia Rebellion AIRM torsion-balance experiment.
 
-The analysis is fully deterministic, pre-registered in structure, and designed to be reproducible by independent users using only the logged data files.
+The pipeline is:
+- Deterministic
+- Pre-registered  
+- Fully reproducible
+- Strictly constrained to model-predicted observables
 
----
+No adaptive tuning, frequency scanning, or post-hoc selection is permitted.
 
 ## 1. Analysis Philosophy
 
-The analysis is guided by four principles:
+The Tier-1 analysis is governed by four principles:
 
-1. **Raw-data primacy** — All analysis begins from unfiltered, timestamped measurements.
-2. **Model-driven detection** — Only signals predicted by the AIRM model are tested.
-3. **Phase coherence requirement** — Detection requires phase stability relative to known reference frequencies.
-4. **Mandatory falsification** — Every positive channel has a corresponding null channel.
+1. **Raw-data primacy**  
+   All analysis begins from unfiltered, timestamped firmware output.
 
-No adaptive tuning, frequency fishing, or post-hoc selection is permitted.
+2. **Model-limited detection**  
+   Only signals explicitly predicted by the AIRM model are tested.
 
----
+3. **Phase coherence requirement**  
+   A valid signal must remain phase-coherent relative to known reference frequencies.
 
-## 2. Input Data Definition
+4. **Mandatory falsification**  
+   Every positive channel has a corresponding null or control channel.
 
-### 2.1 Raw Data Stream
+Failure of any null test invalidates the run.
 
-The firmware outputs one CSV record per sample with the following fields:
+## 2. Input Data Definition (Firmware v0.1)
 
-- `timestamp_ms` — milliseconds since MCU reset
-- `adc_raw` — optical lever readout (0–1023)
-- `step_count` — cumulative stepper motor index
-- `cal_flag` — 1 during calibration pulse, 0 otherwise
+### 2.1 Raw CSV Output
 
-No filtering, averaging, or demodulation occurs in firmware.
+The frozen Tier-1 firmware (`InertiaSpinner.ino`) outputs **one CSV row per sample**:
 
----
+Time_ms,Theta_ADC,Status
+12345,512,OK
+13345,510,OK
 
-### 2.2 Preprocessing (Minimal and Reversible)
 
-The following preprocessing steps are permitted:
+**Field definitions:**
+- `Time_ms` — milliseconds since MCU reset (`millis()`)
+- `Theta_ADC` — raw optical-lever ADC value (integer, 0–1023)  
+- `Status` — always `"OK"` (reserved for diagnostics)
 
-- Conversion of `adc_raw` to angular displacement using a fixed calibration factor
-- Removal of samples flagged during calibration pulses (optional)
-- Linear detrending over long timescales (hours), if required
+### 2.2 Calibration Pulses
 
-No frequency-domain filtering is applied prior to demodulation.
+Magnetic calibration pulses (`C` serial command) are **not explicitly flagged** in the CSV.
 
----
+Their presence is inferred during analysis using:
+- Known command timing
+- Observed angular response
 
-## 3. Target Signal Model
+This behavior is intentional and documented.
 
-### 3.1 AIRM Prediction
+## 3. Preprocessing (Minimal & Reversible)
 
-The AIRM model predicts a modulation of the effective moment of inertia:
+Only the following preprocessing steps are permitted:
 
-- Modulation frequency components at  
-  `f_spin ± f_sid`
+t = Time_ms / 1000.0          # Convert to seconds
+theta_adc = Theta_ADC         # Raw ADC units  
+theta_rad = theta_adc * K     # Fixed calibration factor (from Gate 4)
+Optional (must be reported if used):
+•	Removal of samples during known calibration windows (± several seconds)
+•	Linear detrending over multi-hour timescales
+No frequency-domain filtering is allowed prior to demodulation.
 
-where:
 
-- `f_spin` is the controlled rotation frequency
-- `f_sid` is the sidereal frequency
+## 4. Target Signal Model
 
-The observable is a **slow modulation of the pendulum’s resonance frequency or phase**, not a direct torque at `f_spin`.
+### 4.1 AIRM Prediction
 
----
+The AIRM model predicts a parametric modulation of inertia, producing a slow modulation of the pendulum's resonance frequency.
 
-### 3.2 Observable Quantity
+The expected signal appears at known sideband frequencies:
 
-The primary observable used in analysis is:
-
-- Angular displacement θ(t), or
-- Instantaneous phase / frequency deviation derived from θ(t)
-
-The exact observable must be consistent across baseline and spinner-enabled runs.
-
----
-
-## 4. Demodulation Procedure
-
-### 4.1 Reference Frequencies
-
-All reference frequencies are defined *a priori*:
-
-- `f_spin` — measured from step timing
-- `f_sid` — fixed astronomical constant
-- Sidebands: `f_spin + f_sid`, `f_spin - f_sid`
-
-No frequency scanning is allowed.
-
----
-
-### 4.2 Quadrature Demodulation
-
-For each target frequency `f_ref`, the signal is projected onto orthogonal basis functions:
-
-- `cos(2π f_ref t)`
-- `sin(2π f_ref t)`
-
-This yields in-phase (I) and quadrature (Q) components.
-
-The recovered amplitude is:
-
-- `A = sqrt(I² + Q²)`
-
-This method is phase-agnostic and immune to unknown phase offsets.
-
----
-
-### 4.3 Integration Time
-
-Demodulated signals are averaged over long durations (typically 24–48 hours) to suppress broadband noise.
-
-Shorter integrations are permitted only for calibration and diagnostics.
-
----
-
-## 5. Detection Metric
-
-### 5.1 Signal-to-Noise Ratio (SNR)
-
-Detection significance is quantified using:
-
-- `SNR = A_signal / σ_noise`
+$$f_\mathrm{target} = f_\mathrm{spin} \pm f_\mathrm{sid}$$
 
 where:
+- $f_\mathrm{spin} = 0.001\ \mathrm{Hz}$ (firmware constant)
+- $f_\mathrm{sid} \approx 1.16\times10^{-5}\ \mathrm{Hz}$ (sidereal)
 
-- `A_signal` is the recovered amplitude at the target frequency
-- `σ_noise` is estimated from nearby off-target frequencies or baseline runs
+### 4.2 Observable Quantity
 
----
+Primary observable: angular displacement $\theta(t)$ or derived instantaneous phase/frequency deviation $\delta f(t)$.
 
-### 5.2 Decision Threshold
+Same observable definition used for all baseline and spinner runs.
 
-The predefined detection criterion is:
+## 5. Demodulation Procedure
 
-- **SNR > 10** → Candidate signal (GO)
-- **SNR ≤ 10** → Null result (NO-GO)
+### 5.1 Reference Frequencies (Fixed a priori)
 
-This threshold is fixed and not adjusted post hoc.
+f_spin     = 0.001 Hz (firmware)
+f_sid      = 1.16e-5 Hz (astronomical)  
+f_spin + f_sid
+f_spin - f_sid
 
----
 
-## 6. Null and Falsification Tests
+**No frequency scanning permitted.**
 
-Every analysis run must include the following null tests.
+### 5.2 Quadrature Demodulation
 
----
+For each $f_\mathrm{ref}$:
 
-### 6.1 Baseline (No-Spinner) Test
+$$I = \langle\theta(t) \cos(2\pi f_\mathrm{ref} t)\rangle$$
+$$Q = \langle\theta(t) \sin(2\pi f_\mathrm{ref} t)\rangle$$
+$$A = \sqrt{I^2 + Q^2}$$
 
-**Procedure:**
-- Perform identical analysis on data with rotation disabled.
+### 5.3 Integration Time
 
-**Expected Result:**
-- No signal at `f_spin ± f_sid`
+24–48 hours minimum for Tier-1 runs.
 
-**Failure Condition:**
-- Any statistically significant signal invalidates the dataset.
+## 6. Detection Metric
 
----
+### 6.1 Signal-to-Noise Ratio
 
-### 6.2 Wrong-Frequency Demodulation
+$$\mathrm{SNR} = \frac{A_\mathrm{signal}}{\sigma_\mathrm{noise}}$$
 
-**Procedure:**
-- Demodulate at a frequency offset from the true sideband (e.g., +1–5%).
+$\sigma_\mathrm{noise}$ from nearby frequencies or baseline runs.
 
-**Expected Result:**
-- Signal amplitude collapses to noise floor.
+### 6.2 Decision Threshold (Fixed)
 
-**Purpose:**
-- Confirms phase coherence requirement.
+**SNR > 10** → Candidate signal (GO)  
+**SNR ≤ 10** → Null result (NO-GO)
 
----
+## 7. Mandatory Null & Falsification Tests
 
-### 6.3 Phase Scrambling Test
+### 7.1 Baseline (No-Spinner)
+**Expected:** No signal at $f_\mathrm{spin} \pm f_\mathrm{sid}$
 
-**Procedure:**
-- Randomize phase segments of the time series prior to demodulation.
+### 7.2 Wrong-Frequency (±2-5%)
+**Expected:** $A \to$ noise floor
 
-**Expected Result:**
-- Coherent signal vanishes.
+### 7.3 Phase-Scrambling  
+**Expected:** Coherent signal vanishes
 
----
+### 7.4 Calibration-Window Exclusion
+**Expected:** Signal amplitude unchanged
 
-### 6.4 Calibration-Flag Exclusion
+## 8. Cross-Checks
 
-**Procedure:**
-- Remove all samples during calibration pulses.
-- Repeat analysis.
+- Symmetry between $f_\mathrm{spin}+f_\mathrm{sid}$ and $f_\mathrm{spin}-f_\mathrm{sid}$
+- Stability across 12h windows
+- No correlation with 1 Hz logging or ADC drift
+- No $f_\mathrm{spin}$ harmonics
 
-**Expected Result:**
-- Recovered signal unchanged.
+## 9. Reporting Requirements
 
----
+Run ID: YYYYMMDD-T1-ANALYSIS-v1
+Firmware: v0.1 [commit]
+Data SHA256: [hash]
+SNR(f_spin+f_sid): X.XX ± 0.XX
+Null tests: [PASS/FAIL]
 
-## 7. Cross-Checks
 
-The following consistency checks are performed:
+## 10. Interpretation Boundaries
 
-- Sideband symmetry: `f_spin + f_sid` and `f_spin - f_sid`
-- Stability across independent time windows
-- Absence of correlation with step timing harmonics
-- Independence from ADC mean offset
+**Can do:**
+- Detect/constrain model-predicted modulations
+- Establish $\alpha$ upper bounds
 
----
-
-## 8. Reporting Requirements
-
-Any reported result must include:
-
-- Full description of preprocessing steps
-- Exact reference frequencies used
-- Integration duration
-- All null-test outcomes
-- Firmware and analysis version identifiers
-
-No partial reporting is permitted.
-
----
-
-## 9. Interpretation Boundaries
-
-This analysis pipeline can:
-
-- Detect or constrain coherent, model-predicted modulations
-- Establish upper bounds on coupling strength
-
-It cannot:
-
-- Identify unknown signal morphologies
+**Cannot do:**
+- Identify unknown signals
 - Prove physical origin
-- Replace independent replication
+- Replace replication
 
----
-
-## 10. Status
-
-- Analysis pipeline defined: Yes
-- Null tests mandatory: Yes
-- Detection thresholds fixed: Yes
-- Reproducibility enabled: Yes
-
----
-
-> **Principle:**  
-> *A signal is not what appears — it is what survives being wrong.*
