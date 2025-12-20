@@ -3,17 +3,18 @@ cff-version: 1.2.0
 title: "Inertia Rebellion: Open-Source Instrumentation for Precision Inertial Anisotropy Tests"
 
 message: >
-  If you use this repository, AIRM Spinner hardware, firmware, simulation pipeline,
-  or validation protocols, please cite this work as the methods framework.
+  If you use this repository, the AIRM Spinner hardware, firmware,
+  simulation pipeline, or validation protocols, please cite this work
+  as the methods and instrumentation framework.
 
 authors:
   - family-names: Hind
     given-names: Adam
     affiliation: Independent Researcher, Coquitlam, BC, Canada
 
-version: v0.1
+version: 0.1.0
 
-date-released: 2025-12-18
+date-released: 2025-12-20
 
 licenses:
   - CERN-OHL-P-2.0
@@ -21,16 +22,20 @@ licenses:
 
 repository-code: https://github.com/adamhindTESP/Inertia-Rebellion/releases/tag/v0.1
 
-doi: 10.5281/zenodo.XXXXXXX  # Register on Zenodo post-arXiv for persistence
-
 abstract: >
-  Inertia Rebellion (AIRM) is an open-source citizen science platform for precision
-  torsion-balance experiments probing inertial anisotropy at α~10^{-10} sensitivity.
-  This v0.1 methods release provides: (1) Mach-inspired phenomenological theory,
-  (2) quadrature demodulation analysis pipeline (f_spin ± f_sid), (3) Arduino-based
-  ultra-slow spinner hardware (0.001 Hz, NEMA17/A4988/BPW34), (4) InertiaSpinner.ino
-  firmware, and (5) Tier-1 validation gates (SNR>10 threshold, 4 mandatory nulls).
-  Reproducible at ~$75 USD BOM. No experimental data or physical constraints reported.
+  Inertia Rebellion (AIRM) is an open-source citizen science initiative
+  developing precision torsion-balance instrumentation for testing
+  inertial anisotropy and related frame-dependent effects.
+  This v0.1 methods-only release documents:
+  (1) a Mach-inspired phenomenological model,
+  (2) numerical sensitivity and falsification simulations,
+  (3) a quadrature demodulation analysis pipeline targeting
+      f_spin ± f_sid sidebands,
+  (4) ultra-slow Arduino-based spinner hardware and control firmware,
+  and (5) Tier-1 validation and calibration gates with mandatory null tests.
+  Numerical simulations establish a target sensitivity of order α ~ 10⁻¹⁰.
+  No experimental hardware has yet been built and no physical data or
+  constraints are reported.
 
 keywords:
   - anisotropic inertia
@@ -46,15 +51,14 @@ preferred-citation:
   authors:
     - family-names: Hind
       given-names: Adam
-  title: |
-    AIRM Spinner v0.1: Open-Source Torsion Platform for 10^{-10} Inertial Anisotropy Tests
+  title: >
+    AIRM Spinner v0.1: Open-Source Torsion-Balance Platform for Inertial Anisotropy Tests
   journal: "Inertia Rebellion Project (Tier-1 Methods Release)"
-  volume: "v0.1"
   year: 2025
   month: 12
   url: https://github.com/adamhindTESP/Inertia-Rebellion/releases/tag/v0.1
-  doi: 10.5281/zenodo.XXXXXXX  # Reserve after arXiv
-  notes: |
-    Pre-registered methods-only release. Hardware unbuilt, no experimental data.
-    Validation: 7 gates (static pendulum + spinner stability), SNR>10 GO/NO-GO.
-    Frozen Dec 18, 2025 for independent replication.
+  notes: >
+    Pre-registered methods-only release.
+    Hardware unbuilt and uncharacterized.
+    No experimental data reported.
+    Validation gates defined but not yet executed.
