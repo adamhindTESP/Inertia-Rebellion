@@ -61,11 +61,13 @@ Only the following preprocessing steps are permitted:
 t = Time_ms / 1000.0          # Convert to seconds
 theta_adc = Theta_ADC         # Raw ADC units  
 theta_rad = theta_adc * K     # Fixed calibration factor (from Gate 4)
-Optional (must be reported if used):
-•	Removal of samples during known calibration windows (± several seconds)
-•	Linear detrending over multi-hour timescales
-No frequency-domain filtering is allowed prior to demodulation.
 
+
+**Optional** (must be reported if used):
+- Removal of samples during known calibration windows (± several seconds)
+- Linear detrending over multi-hour timescales
+
+**No frequency-domain filtering** is allowed prior to demodulation.
 
 ## 4. Target Signal Model
 
@@ -78,12 +80,12 @@ The expected signal appears at known sideband frequencies:
 $$f_\mathrm{target} = f_\mathrm{spin} \pm f_\mathrm{sid}$$
 
 where:
-- $f_\mathrm{spin} = 0.001\ \mathrm{Hz}$ (firmware constant)
-- $f_\mathrm{sid} \approx 1.16\times10^{-5}\ \mathrm{Hz}$ (sidereal)
+- $$f_\mathrm{spin} = 0.001\ \mathrm{Hz}$$ (firmware constant)
+- $$f_\mathrm{sid} \approx 1.16\times10^{-5}\ \mathrm{Hz}$$ (sidereal)
 
 ### 4.2 Observable Quantity
 
-Primary observable: angular displacement $\theta(t)$ or derived instantaneous phase/frequency deviation $\delta f(t)$.
+Primary observable: angular displacement $$\theta(t)$$ or derived instantaneous phase/frequency deviation $$\delta f(t)$$.
 
 Same observable definition used for all baseline and spinner runs.
 
@@ -101,7 +103,7 @@ f_spin - f_sid
 
 ### 5.2 Quadrature Demodulation
 
-For each $f_\mathrm{ref}$:
+For each $$f_\mathrm{ref}$$:
 
 $$I = \langle\theta(t) \cos(2\pi f_\mathrm{ref} t)\rangle$$
 $$Q = \langle\theta(t) \sin(2\pi f_\mathrm{ref} t)\rangle$$
@@ -117,7 +119,7 @@ $$A = \sqrt{I^2 + Q^2}$$
 
 $$\mathrm{SNR} = \frac{A_\mathrm{signal}}{\sigma_\mathrm{noise}}$$
 
-$\sigma_\mathrm{noise}$ from nearby frequencies or baseline runs.
+$$\sigma_\mathrm{noise}$$ from nearby frequencies or baseline runs.
 
 ### 6.2 Decision Threshold (Fixed)
 
@@ -127,10 +129,10 @@ $\sigma_\mathrm{noise}$ from nearby frequencies or baseline runs.
 ## 7. Mandatory Null & Falsification Tests
 
 ### 7.1 Baseline (No-Spinner)
-**Expected:** No signal at $f_\mathrm{spin} \pm f_\mathrm{sid}$
+**Expected:** No signal at $$f_\mathrm{spin} \pm f_\mathrm{sid}$$
 
 ### 7.2 Wrong-Frequency (±2-5%)
-**Expected:** $A \to$ noise floor
+**Expected:** $$A \to$$ noise floor
 
 ### 7.3 Phase-Scrambling  
 **Expected:** Coherent signal vanishes
@@ -140,10 +142,10 @@ $\sigma_\mathrm{noise}$ from nearby frequencies or baseline runs.
 
 ## 8. Cross-Checks
 
-- Symmetry between $f_\mathrm{spin}+f_\mathrm{sid}$ and $f_\mathrm{spin}-f_\mathrm{sid}$
+- Symmetry between $$f_\mathrm{spin}+f_\mathrm{sid}$$ and $$f_\mathrm{spin}-f_\mathrm{sid}$$
 - Stability across 12h windows
 - No correlation with 1 Hz logging or ADC drift
-- No $f_\mathrm{spin}$ harmonics
+- No $$f_\mathrm{spin}$$ harmonics
 
 ## 9. Reporting Requirements
 
@@ -158,10 +160,14 @@ Null tests: [PASS/FAIL]
 
 **Can do:**
 - Detect/constrain model-predicted modulations
-- Establish $\alpha$ upper bounds
+- Establish $$\alpha$$ upper bounds
 
 **Cannot do:**
 - Identify unknown signals
 - Prove physical origin
 - Replace replication
 
+---
+
+**Status:** ✅ **FREEZE READY**  
+**Tier-1 Complete Stack:** firmware + hardware + simulation + theory + analysis
