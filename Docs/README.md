@@ -1,82 +1,88 @@
-# Inertia Rebellion — Documentation
+# Inertia Rebellion — Documentation Index
 
-Welcome to the **Inertia Rebellion** documentation site.
+This directory contains the **authoritative documentation** for the
+Inertia Rebellion project.
 
-This repository hosts open experimental hardware, firmware, analysis methods, and replication protocols for investigating **inertial anisotropy and frame-dependent effects** using low-cost, reproducible torsion-balance–style apparatus.
+These documents define the **Tier-1 frozen experiment**:  
+hardware, firmware behavior, calibration logic, analysis rules, and
+replication boundaries.
 
-All documentation is written to support:
-- Independent replication
-- Incremental improvement
-- Transparent error analysis
-- Publication-adjacent technical clarity
-
-This is not a claim repository.  
-This is a **measurement and methods repository**.
+This directory does **not** contain code or simulations.  
+It defines **how those components must behave and be interpreted**.
 
 ---
 
-## Project Overview
+## Documentation Scope
 
-The **Inertia Rebellion Project** explores whether small, orientation-dependent or time-dependent deviations in inertial response can be detected using Earth-based rotating torsion systems.
+The documents in this folder are normative.  
+They specify:
 
-The core experimental platform is the **AIRM Spinner**:
-- A slowly rotating torsion pendulum
-- Optical lever readout
-- Controlled magnetic calibration torque
-- Continuous data logging for long-baseline analysis
+- What the experiment *is*
+- What the experiment *is not*
+- What assumptions are allowed
+- What invalidates a dataset
+- What must be reported for replication
 
-The design emphasizes:
-- Ultra-low rotation frequencies
-- Known injected calibration signals
-- Open, auditable electronics and firmware
-- Cost accessibility (sub-$200 electronics target)
-
----
-
-## What This Documentation Covers
-
-This documentation site includes:
-
-- **Hardware construction**
-  - Electronics schematics
-  - Wiring and pinouts
-  - Optical lever alignment
-  - Power and safety considerations
-
-- **Firmware**
-  - Stepper control
-  - Calibration pulse generation
-  - ADC data acquisition
-  - Serial logging format
-
-- **Calibration & Validation**
-  - Magnetic torque injection
-  - Optical sensitivity calibration
-  - Noise baseline characterization
-  - Sanity checks and failure modes
-
-- **Data & Analysis**
-  - Expected signal structure
-  - Rotation and sidereal modulation concepts
-  - Noise sources and systematic controls
-  - Replication-first analysis philosophy
-
-- **Replication Guidance**
-  - Builder checklists
-  - Common pitfalls
-  - Parameter ranges that matter
-  - What *does not* matter
+Any change to Tier-1 behavior requires updating these documents
+and incrementing the experiment version.
 
 ---
 
 ## Documentation Structure
 
-```text
-docs/
-├── README.md        ← This page (project overview)
-├── hardware.md      ← Hardware build & schematics
-├── firmware.md      ← Arduino / control firmware
-├── calibration.md   ← Calibration & validation procedures
-├── analysis.md      ← Data analysis & interpretation
-├── simulation.md   ← Simulations & synthetic data
-└── contribute.md   ← How to contribute or replicate
+Docs/
+├── README.md        ← This index
+├── hardware.md      ← Hardware design & limitations
+├── firmware.md      ← Firmware guarantees & I/O behavior
+├── calibration.md   ← Calibration & validation logic
+├── analysis.md      ← Signal extraction & null tests
+├── simulation.md   ← Simulation assumptions & scope
+├── contribute.md   ← How to replicate or contribute
+└── FUTURE_WORK.md  ← Speculative, non-frozen extensions
+
+---
+
+## Relation to Code & Data
+
+The documentation here **governs** the following top-level directories:
+
+- `Firmware/`  
+  → Implementation of the documented firmware behavior
+
+- `hardware/`  
+  → Schematics and build materials consistent with `hardware.md`
+
+- `simulation/`  
+  → Numerical simulations constrained by `simulation.md`
+
+- `theory/`  
+  → Phenomenological framework referenced by analysis
+
+Documentation is always treated as **upstream** of code and data.
+
+---
+
+## Freeze Policy
+
+Tier-1 documentation is **frozen by version**.
+
+A change to any of the following requires a documented version increment:
+
+- Firmware output format
+- Calibration method
+- Analysis pipeline
+- Hardware coupling assumptions
+
+Speculative ideas are isolated in `FUTURE_WORK.md`
+and do **not** affect Tier-1 validity.
+
+---
+
+## Guiding Principle
+
+> *If it is not documented here, it is not part of Tier-1.*
+
+This separation ensures:
+- Reproducibility
+- Auditability
+- Clear scientific boundaries
