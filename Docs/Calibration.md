@@ -134,15 +134,18 @@ The exact waveform is not critical, provided it is:
 
 ### 5.2 Logging Requirements
 
-Each calibration pulse is logged with:
+Calibration pulses are **not explicitly flagged** in the firmware data stream.
 
-- A timestamp
-- A calibration flag in the data stream
+Instead, calibration timing is inferred during analysis using:
+- Known serial command timestamps
+- The characteristic transient angular response of the pendulum
 
-This allows:
-- Precise alignment of torque injection and response
-- Blind analysis using identical pipelines
-- Verification that signals disappear when calibration is disabled
+This design choice ensures:
+- Minimal firmware complexity
+- Raw-data primacy
+- Independent verification by third parties
+
+Calibration windows may be excluded or analyzed explicitly during offline processing.
 
 ---
 
