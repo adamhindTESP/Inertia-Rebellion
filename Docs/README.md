@@ -46,7 +46,7 @@ Docs/
 
 The documentation here **governs** the following top-level directories:
 
-- `Firmware/`  
+- `firmware/`  
   → Implementation of the documented firmware behavior
 
 - `hardware/`  
