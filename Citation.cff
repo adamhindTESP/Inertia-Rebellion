@@ -12,7 +12,7 @@ authors:
     given-names: Adam
     affiliation: Independent Researcher, Coquitlam, BC, Canada
 
-version: 0.1.0
+version: 1.0
 
 date-released: 2025-12-20
 
@@ -26,7 +26,7 @@ abstract: >
   Inertia Rebellion (AIRM) is an open-source citizen science initiative
   developing precision torsion-balance instrumentation for testing
   inertial anisotropy and related frame-dependent effects.
-  This v0.1 methods-only release documents:
+  This v1.0 methods-only release documents:
   (1) a Mach-inspired phenomenological model,
   (2) numerical sensitivity and falsification simulations,
   (3) a quadrature demodulation analysis pipeline targeting
@@ -52,7 +52,7 @@ preferred-citation:
     - family-names: Hind
       given-names: Adam
   title: >
-    AIRM Spinner v0.1: Open-Source Torsion-Balance Platform for Inertial Anisotropy Tests
+    AIRM Spinner v1.0: Open-Source Torsion-Balance Platform for Inertial Anisotropy Tests
   journal: "Inertia Rebellion Project (Tier-1 Methods Release)"
   year: 2025
   month: 12
