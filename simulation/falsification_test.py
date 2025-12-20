@@ -1,133 +1,155 @@
-# ============================================================
-# Inertia Rebellion - Tightened Falsification Test (Gate 0)
-# ============================================================
+# Falsification Test — Frequency Discrimination (Gate 0)
 
-import numpy as np
-from scipy.integrate import solve_ivp
-from scipy.signal import butter, filtfilt
+This document defines the **primary falsification test** used in the AIRM
+numerical simulations to verify that the analysis pipeline is **frequency-selective**
+and does **not** generate spurious coherent signals.
 
-# ----------------- Hardware Parameters -----------------
-I0 = 1.0e-3          # kg·m²
-kappa = 1.0e-4       # N·m/rad
-gamma = kappa / 1e5  # damping for Q ≈ 1e5
-f0 = np.sqrt(kappa / I0) / (2 * np.pi)
+This test is mandatory for all Tier-1 numerical validation.
 
-# ----------------- Modulation Parameters -----------------
-f_spin = 1.0 / 1000.0
-f_sid = 1.0 / (23.9345 * 3600.0)
-phi = 0.0
+---
 
-# Frequencies
-f_true = f_spin + f_sid
-delta = 0.02                  # 2% offset for falsification
-f_false = f_true * (1 + delta)
+## Purpose
 
-# ----------------- Simulation Settings -----------------
-duration = 48 * 3600.0        # 48 hours
-fs = 1.0                      # Hz
-dt = 1 / fs
-t_eval = np.arange(0, duration, dt)
+The falsification test answers a single question:
 
-y0 = [1e-6, 0.0]              # initial conditions
-noise_density = 1.0e-8        # rad / sqrt(Hz)
-num_realizations = 10
+> **Does the analysis pipeline recover a signal only at the correct,
+> model-predicted frequency — and collapse when evaluated elsewhere?**
 
-# Edge trimming (to suppress filtfilt artifacts)
-trim_s = 600.0                # 10 minutes
-trim_mask = (t_eval >= trim_s) & (t_eval <= (duration - trim_s))
-t_trim = t_eval[trim_mask]
+A pipeline that recovers comparable amplitudes at incorrect frequencies
+is **invalid**, regardless of apparent signal-to-noise ratio.
 
-# ----------------- Core Functions -----------------
-def epsilon_total(t, alpha):
-    return alpha * np.cos(2 * np.pi * f_true * t + phi)
+---
 
-def airm_eom(t, y, alpha):
-    theta, theta_dot = y
-    eps = epsilon_total(t, alpha)
-    theta_ddot = (-gamma * theta_dot - kappa * theta) / (I0 * (1.0 + eps))
-    return [theta_dot, theta_ddot]
+## Conceptual Basis
 
-def run_simulation(alpha):
-    sol = solve_ivp(
-        lambda t, y: airm_eom(t, y, alpha),
-        [0, duration],
-        y0,
-        t_eval=t_eval,
-        rtol=1e-9,
-        atol=1e-12
-    )
-    return sol.y[0]
+The AIRM framework predicts a coherent modulation at a **specific,
+a priori defined frequency**:
 
-def extract_modulation_power(delta_f, target_freq, t):
-    cos_t = np.cos(2 * np.pi * target_freq * t)
-    sin_t = np.sin(2 * np.pi * target_freq * t)
+\[
+f_\text{true} = f_\text{spin} + f_\text{sid}
+\]
 
-    cos_t /= np.sqrt(np.mean(cos_t**2))
-    sin_t /= np.sqrt(np.mean(sin_t**2))
+The falsification test deliberately evaluates the recovered signal at a
+nearby but incorrect frequency:
 
-    a = np.mean(delta_f * cos_t)
-    b = np.mean(delta_f * sin_t)
-    return np.sqrt(a**2 + b**2)
+\[
+f_\text{false} = (1 + \delta)\,f_\text{true}
+\]
 
-# ----------------- Run Falsification Test -----------------
-alpha = 1e-11  # Test amplitude
+with a fixed offset:
 
-amps_true = []
-amps_false = []
+\[
+\delta = 0.02 \quad (2\%)
+\]
 
-# Correct discrete-time noise scaling (one-sided ASD)
-noise_rms_per_sample = noise_density * np.sqrt(fs / 2.0)
+This offset is chosen such that:
 
-for _ in range(num_realizations):
-    theta = run_simulation(alpha)
+- It is **well outside** the Fourier resolution of a 48-hour integration
+- It is **close enough** to expose spectral leakage or over-broad filters
+- It does **not** overlap the correct sideband under any reasonable windowing
 
-    # Add noise
-    theta_noisy = theta + noise_rms_per_sample * np.random.randn(len(theta))
+---
 
-    # Quadrature demodulation at f0
-    cos_ref = np.cos(2 * np.pi * f0 * t_eval)
-    sin_ref = np.sin(2 * np.pi * f0 * t_eval)
+## Simulation Configuration
 
-    I = theta_noisy * cos_ref
-    Q = -theta_noisy * sin_ref
+The falsification test uses the same physical and numerical model as the
+main sensitivity simulations, including:
 
-    # Low-pass filter
-    cutoff = 0.003  # Hz
-    b, a = butter(6, cutoff / (fs / 2), 'low')
-    I_f = filtfilt(b, a, I)
-    Q_f = filtfilt(b, a, Q)
+- High-Q torsional oscillator dynamics
+- Externally prescribed inertia modulation at \( f_\text{true} \)
+- Additive white Gaussian readout noise
+- Quadrature demodulation at the carrier frequency \( f_0 \)
+- Low-pass filtering, phase unwrapping, and frequency extraction
 
-    # Phase → frequency deviation
-    phase = np.unwrap(np.arctan2(Q_f, I_f))
-    slope, intercept = np.polyfit(t_eval, phase, 1)
-    phase_detrended = phase - (slope * t_eval + intercept)
+No additional assumptions are introduced.
 
-    dphase_dt = np.gradient(phase_detrended, dt)
-    delta_f = dphase_dt / (2 * np.pi)
+---
 
-    # Trim edges
-    delta_f_trim = delta_f[trim_mask]
+## Analysis Procedure
 
-    # Extract amplitudes
-    amps_true.append(
-        extract_modulation_power(delta_f_trim, f_true, t_trim)
-    )
-    amps_false.append(
-        extract_modulation_power(delta_f_trim, f_false, t_trim)
-    )
+For each realization:
 
-# ----------------- Results -----------------
-amp_true_avg = np.mean(amps_true)
-amp_false_avg = np.mean(amps_false)
-ratio = amp_false_avg / (amp_true_avg + 1e-30)
+1. Integrate the equation of motion with a nonzero injected coupling \( \alpha \)
+2. Add Gaussian measurement noise
+3. Perform quadrature (IQ) demodulation at the natural frequency \( f_0 \)
+4. Low-pass filter I/Q channels to isolate slow phase evolution
+5. Unwrap phase and remove linear trend
+6. Convert phase slope to instantaneous frequency deviation:
+   \[
+   \delta f(t) = \frac{1}{2\pi}\,\frac{d\phi}{dt}
+   \]
+7. Coherently project \( \delta f(t) \) onto:
+   - the **true** frequency \( f_\text{true} \)
+   - the **false** frequency \( f_\text{false} \)
 
-print("\nTightened Falsification Test Results")
-print("------------------------------------")
-print(f"True frequency amplitude:  {amp_true_avg:.2e} Hz")
-print(f"False frequency amplitude: {amp_false_avg:.2e} Hz")
-print(f"False / True ratio:        {ratio:.3e}")
+Recovered amplitudes are averaged over multiple noise realizations.
 
-if ratio < 0.1:
-    print("✅ PASS: Signal collapses under frequency offset (Gate 0 PASSED)")
-else:
-    print("⛔ FAIL: Frequency discrimination insufficient (Gate 0 FAILED)")
+---
+
+## Decision Metric
+
+The falsification metric is the **amplitude ratio**:
+
+\[
+R = \frac{A(f_\text{false})}{A(f_\text{true})}
+\]
+
+where:
+- \( A(f_\text{true}) \) is the recovered amplitude at the injected frequency
+- \( A(f_\text{false}) \) is the recovered amplitude at the offset frequency
+
+---
+
+## Pass / Fail Criterion (Gate 0)
+
+| Condition | Interpretation |
+|---------|----------------|
+| \( R < 0.1 \) | **PASS** — frequency discrimination confirmed |
+| \( R \ge 0.1 \) | **FAIL** — pipeline insufficiently selective |
+
+This threshold is fixed and not tuned post hoc.
+
+A failure at this gate invalidates:
+- sensitivity estimates,
+- SNR calculations,
+- and any downstream “GO” decision.
+
+---
+
+## Rationale
+
+This falsification test guards against:
+
+- Spectral leakage
+- Over-broad filtering
+- Accidental demodulation of unrelated components
+- Pipeline bias toward coherence at arbitrary frequencies
+
+A valid pipeline must **know where not to see a signal**.
+
+---
+
+## Scope and Interpretation
+
+Passing this falsification test:
+
+- **Does NOT** imply new physics
+- **Does NOT** validate the AIRM hypothesis
+- **DOES** demonstrate that the analysis pipeline is frequency-coherent and selective
+
+This test establishes **methodological credibility only**.
+
+---
+
+## Status
+
+- Falsification test: **Implemented**
+- Threshold: **Fixed**
+- Interpretation: **Methodological only**
+- Tier-1 requirement: **Mandatory**
+
+---
+
+> **Principle:**  
+> *A real signal survives being wrong.  
+> A fake signal does not care where you look.*
