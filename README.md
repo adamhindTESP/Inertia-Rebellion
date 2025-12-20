@@ -154,7 +154,7 @@ throughout the repository as the **AIRM Spinner**.
 
 Complete build documentation, BOMs, firmware, and validation gates are provided in:
 
-/hardware/
+/hardware/ /firmware/
 
 ---
 
