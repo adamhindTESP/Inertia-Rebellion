@@ -3,7 +3,7 @@
 AIRM Spinner — Full Sensitivity & Falsification Analysis
 =======================================================
 
-This script performs a *numerical sensitivity study* of the AIRM
+This script performs a numerical sensitivity study of the AIRM
 (Anisotropic Inertial Response Model) torsion-balance apparatus with
 spinner modulation enabled.
 
@@ -25,7 +25,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 from scipy.signal import welch, butter, filtfilt
-from scipy.stats import norm
+
+# Reproducibility (Tier-1 requirement)
+np.random.seed(0)
 
 # ============================================================
 # 1. HARDWARE PARAMETERS (EDIT TO MATCH BUILD)
@@ -39,6 +41,8 @@ omega0 = np.sqrt(kappa / I0)
 f0 = omega0 / (2 * np.pi)
 T0 = 2 * np.pi / omega0
 Q = I0 * omega0 / gamma
+
+assert Q > 1e4, "Unphysically low Q"
 
 # ============================================================
 # 2. MODULATION PARAMETERS (LOCKED)
@@ -68,12 +72,13 @@ def epsilon_total(t):
 # ============================================================
 
 USE_NUMERICAL_DRIVE = True
-DRIVE_TORQUE = 5e-10  # N·m (numerical amplitude maintenance only)
+DRIVE_TORQUE = 5e-10  # N·m (numerical carrier-maintenance only)
 
 def airm_eom(t, y):
     """
     Authoritative equation of motion.
-    Drive exists ONLY to prevent numerical ring-down.
+    A small numerical drive is used only to prevent ring-down and
+    does not contribute to sideband content.
     """
     theta, theta_dot = y
 
@@ -148,6 +153,9 @@ delta_f = np.gradient(phase, 1/fs) / (2 * np.pi)
 # 9. SPECTRAL ANALYSIS
 # ============================================================
 
+# NOTE: PSD-based SNR used here is equivalent to matched-filter SNR
+# under stationary Gaussian noise assumptions.
+
 nperseg = min(2**17, len(delta_f))
 f, Pxx = welch(delta_f, fs=fs, nperseg=nperseg)
 
@@ -185,14 +193,19 @@ null_snr = Pxx_n[idx] / np.median(Pxx_n[band])
 alpha = alpha_save
 
 # ============================================================
-# 11. DECISION
+# 11. DECISION (Tier-1 Fixed Threshold)
 # ============================================================
 
-DETECTION_THRESHOLD = 5.0
+DETECTION_THRESHOLD = 10.0
 go = snr_int > DETECTION_THRESHOLD
 
 print("\n=== AIRM SPINNER SENSITIVITY REPORT ===")
 print(f"Injected α: {alpha:.1e}")
 print(f"Integrated SNR: {snr_int:.2f}")
 print(f"Null SNR: {null_snr:.2f}")
-print(f"Decision: {'GO (pipeline sensitive)' if go else 'NO-GO (insufficient sensitivity)'}")
+print(
+    "Decision: "
+    + ("GO (analysis pipeline recovers injected signal)"
+       if go else
+       "NO-GO (insufficient sensitivity)")
+)
