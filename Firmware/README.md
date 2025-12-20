@@ -151,6 +151,10 @@ Their presence must be inferred during analysis using:
 
 This behavior is intentional and documented.
 
+All data runs must record:
+- Firmware release tag (e.g., v1.0.0)
+- Firmware git commit hash (if not a tagged release)
+
 ---
 
 ## Design Principle
