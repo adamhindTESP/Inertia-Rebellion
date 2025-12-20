@@ -1,178 +1,204 @@
+***
+
 # Methods for AIRM Sensitivity Simulations
 
-This document describes the methodology used in the AIRM torsion-pendulum sensitivity simulations. It defines the physical model, numerical methods, noise assumptions, analysis pipeline, and decision criteria to enable full reproducibility and independent review.
+This document defines the **numerical methodology** used in the AIRM (Anisotropic Inertial Response Model) torsion‑pendulum sensitivity simulations.[1]
 
----
+It specifies the physical model, numerical integration scheme, noise assumptions, analysis pipeline, falsification tests, and decision criteria to enable **full reproducibility and independent audit**.[1]
+
+***
+
+## IMPORTANT SCIENTIFIC SCOPE STATEMENT
+
+These simulations:
+
+- **DO NOT** demonstrate new physics  
+- **DO NOT** assert the existence of anisotropic inertia  
+- **DO** test whether a predefined analysis pipeline can recover a *known, externally prescribed modulation* under controlled assumptions  
+
+All signals are injected by construction.  
+All conclusions are methodological.[1]
+
+A numerical “GO” means:
+
+> *If a signal of this form existed at this strength, the pipeline would recover it.*
+
+Reality is decided by hardware, not simulations.[1]
+
+***
 
 ## 1. Overview
 
-The simulations evaluate the detectability of small, externally prescribed, time-dependent modulations in the effective inertia of a torsional oscillator.
+The simulations evaluate the detectability of a small, time‑dependent modulation of the effective moment of inertia of a torsional oscillator.[1]
 
-IMPORTANT SCOPE STATEMENT  
-These simulations do NOT demonstrate new physics.  
-Their sole purpose is to establish the sensitivity limits of the measurement and analysis pipeline under controlled assumptions.
+Two configurations are studied:
 
-Two configurations are simulated:
+- **Baseline (null)**  
+  $$\epsilon(t) = 0$$
 
-- Baseline (no spinner):  
-  epsilon(t) = 0
+- **Spinner‑enabled**  
+  $$\epsilon(t) = \alpha \cos[2\pi (f_\text{spin} + f_\text{sid}) t + \phi]$$
 
-- Spinner-enabled:  
-  epsilon(t) = alpha * cos(2π * (f_spin + f_sid) * t + phi)
+where $$\alpha$$ is a dimensionless phenomenological coupling parameter.[1]
 
----
+***
 
-## 2. Model Equations
+## 2. Physical Model
 
-The torsion pendulum is modeled as a damped harmonic oscillator with a small, phenomenological modulation of its effective inertia.
+The torsion pendulum is modeled as a damped harmonic oscillator with a phenomenological, time‑dependent effective inertia.[1]
 
-The equation of motion integrated by the simulations is:
+The **equation of motion implemented in the code** is:
 
-theta_ddot(t)
-+ (gamma / I0) * theta_dot(t)
-+ [kappa / (I0 * (1 + epsilon(t)))] * theta(t)
-= 0
+$$
+I_0 [1 + \epsilon(t)] \ddot{\theta}(t) + \gamma \dot{\theta}(t) + \kappa \theta(t) = \tau_\text{drive}(t)
+$$
 
-Where:
+where:
 
-- theta(t) is the angular displacement [rad]  
-- I0 is the nominal moment of inertia [kg·m²]  
-- kappa is the torsion constant [N·m / rad]  
-- gamma is the damping coefficient [N·m·s / rad]  
-- epsilon(t) is an externally prescribed fractional inertia modulation  
+- $$\theta(t)$$ — angular displacement (rad)  
+- $$I_0$$ — nominal moment of inertia (kg·m²)  
+- $$\gamma$$ — damping coefficient (N·m·s/rad)  
+- $$\kappa$$ — torsion constant (N·m/rad)  
+- $$\epsilon(t)$$ — externally prescribed fractional inertia modulation  
+- $$\tau_\text{drive}(t)$$ — **numerical carrier‑maintenance torque**[1]
 
-NOTE  
-The modulation epsilon(t) is purely phenomenological and does not assume any physical interaction or mechanism.
+### Numerical Drive (Explicitly Non‑Physical)
 
----
+A small sinusoidal drive torque is included:
 
-## 3. Numerical Methods
+$$
+\tau_\text{drive}(t) = \tau_0 \sin(\omega_0 t)
+$$
 
-- The equations of motion are solved using:
-  - scipy.integrate.solve_ivp
-  - RK45 integrator
-- Solver tolerances:
-  - rtol = 1e-9
-  - atol = 1e-12
-- Time sampling:
-  - Uniform step: dt = 1 second
-  - Total duration: 48 hours
+This drive exists **only** to prevent numerical ring‑down during long integrations and to maintain a stable carrier for phase demodulation.[1]
 
-The integration duration is sufficient to resolve sidereal-scale modulation frequencies.
+- It does **not** inject power at the target sideband  
+- It does **not** affect detectability conclusions  
+- It has no physical interpretation  
 
----
+***
+
+## 3. Numerical Integration
+
+- Integrator: `scipy.integrate.solve_ivp`  
+- Method: RK45  
+- Relative tolerance: `rtol = 1e-10`  
+- Absolute tolerance: `atol = 1e-13`[1]
+
+### Time Sampling
+
+- Sampling rate: `fs = 5 Hz`  
+- Time step: `dt = 0.2 s`  
+- Total duration: `48 hours`  
+
+This duration is sufficient to resolve sidereal‑scale modulation frequencies.[1]
+
+***
 
 ## 4. Noise Model
 
-Readout noise is modeled as additive Gaussian noise applied directly to the angular displacement.
+Measurement noise is modeled as **additive, white Gaussian noise** applied directly to the angular displacement.[1]
 
-- RMS noise per sample:
-  - 1e-8 rad
-- Noise is uncorrelated between samples
-- This approximates realistic optical-lever sensitivity in torsion-pendulum experiments
+- RMS noise per sample: `1 × 10⁻⁸ rad`  
+- Noise is uncorrelated between samples  
+- No colored or environmental noise is included  
 
-No colored noise or frequency-dependent shaping is applied.
+This represents an optimistic but realistic optical‑lever readout limit.[1]
 
----
+***
 
-## 5. Analysis Procedure
+## 5. Analysis Pipeline
 
-### 5.1 Baseline Simulation (NO-GO Reference)
+The same pipeline is applied to both null and signal‑injected simulations.[1]
 
-- Integrate the equation of motion with epsilon(t) = 0
-- Compute the power spectral density (PSD) using Welch’s method
-- Inspect the spectrum at target frequencies
-- Establish the numerical noise floor
-- Verify the absence of coherent false positives
+### Step‑by‑Step Procedure
 
-This configuration defines the null background.
+1. Integrate the equation of motion  
+2. Add measurement noise to $$\theta(t)$$  
+3. Perform quadrature (IQ) demodulation at the natural frequency $$f_0$$  
+4. Low‑pass filter the I/Q channels to isolate slow phase evolution  
+5. Unwrap the phase and remove linear trends  
+6. Convert phase slope to instantaneous frequency deviation:  
+   $$
+   \delta f(t) = \frac{1}{2\pi} \frac{d\phi}{dt}
+   $$  
+7. Estimate recovered signal amplitude using coherent projection (matched filtering) at the **target frequency**  
+   $$
+   f_\text{target} = f_\text{spin} + f_\text{sid}
+   $$
+[1]
 
----
+***
 
-### 5.2 Spinner-Enabled Sensitivity Analysis
+## 6. Null and Falsification Tests
 
-For simulations with nonzero modulation:
+### 6.1 Baseline Null Test
 
-1. Integrate the equation of motion
-2. Add measurement noise
-3. Perform quadrature (IQ) demodulation at the natural frequency f0
-4. Apply low-pass filtering to isolate slow phase evolution
-5. Unwrap the phase and remove linear trends
-6. Convert phase slope to instantaneous frequency deviation:
+- Set $$\alpha = 0$$  
+- Run the full pipeline  
+- Establish the numerical noise floor  
+- Verify absence of coherent recovery at $$f_\text{target}$$[1]
 
-   delta_f(t) = (1 / (2π)) * d(phi)/dt
+### 6.2 Wrong‑Frequency Falsification
 
-7. Project delta_f(t) onto reference sinusoids at:
-   - f_spin + f_sid
-   - f_spin − f_sid
-8. Sweep the coupling strength alpha to determine the minimum detectable signal
+- Analyze recovered data at an intentionally incorrect frequency  
+- Confirm recovered amplitude collapses to the null background  
 
----
+A pipeline that recovers comparable amplitudes at correct and incorrect frequencies is considered invalid.[1]
 
-### 5.3 Falsification / Null Test
+***
 
-A falsification test is performed by deliberately analyzing the recovered signal at an incorrect reference frequency.
+## 7. Detection Metric & Decision Rule
 
-- When the demodulation frequency does not match the injected modulation, the recovered signal collapses to the null background
-- This confirms the pipeline does not generate spurious coherent signals
-- Signal recovery requires correct phase coherence
+Detection significance is quantified using a signal‑to‑noise ratio (SNR) relative to the null background.[1]
 
----
+| Condition | Interpretation |
+|----------|----------------|
+| `SNR ≥ 10` | **GO** — pipeline is sensitive |
+| `SNR < 10` | **NO‑GO** — sensitivity insufficient |
 
-## 6. Decision Criteria
+This threshold is **fixed a priori** and not tuned post hoc.[1]
 
-Detection significance is quantified using a signal-to-noise ratio (SNR) relative to the null distribution.
+***
 
-| Metric | Threshold | Interpretation |
-|------|----------|----------------|
-| SNR > 10 | GO | Signal considered detectable |
-| SNR ≤ 10 | NO-GO | Configuration is null-limited |
+## 8. Reproducibility
 
-The null distribution is obtained from simulations with alpha = 0.
+All simulations are reproducible using Python 3.x with:
 
----
+- `numpy`  
+- `scipy`  
+- `matplotlib` (optional)[1]
 
-## 7. Reproducibility
+Relevant scripts:
 
-All parameters, assumptions, and analysis steps are implemented in:
+- `airm_full_analysis.py`  
+- `baseline_no_spinner.py`  
+- `falsification_test.py`  
+- `README.md` (directory‑level context)[1]
 
-- baseline_no_spinner.py
-- sensitivity_analysis_full.py
-- falsification_test.py
-- simulation/README.md
+Random number generation is explicitly seeded for reproducibility.[1]
 
-Simulations can be reproduced using Python 3.x with:
+***
 
-- numpy
-- scipy
-- matplotlib (optional, for plots)
+## 9. Limitations
 
----
+- The modulation $$\epsilon(t)$$ is purely phenomenological  
+- Linear dynamics are assumed  
+- Environmental and nonlinear effects are not modeled  
+- Sensitivity depends on assumed noise level and quality factor[1]
 
-## 8. Limitations
+Results represent **best‑case methodological sensitivity**, not guaranteed experimental performance.[1]
 
-- epsilon(t) is phenomenological and does not represent a known interaction
-- Simulations assume linear dynamics
-- Real hardware may exhibit nonlinearities and environmental couplings
-- Results depend on assumed noise level, damping, and quality factor
+***
 
----
+## Final Statement
 
-## 9. References / Further Reading
+These simulations exist to enforce **analysis discipline**.[1]
 
-Torsion Pendulum Methods
-- Adelberger et al., Annual Review of Nuclear and Particle Science (2003)
-- Li et al., Sensors (2024)
-- Chen et al., Sensors (2023)
+They ensure that:
 
-Numerical Methods
-- SciPy documentation for solve_ivp
+- the pipeline behaves correctly,  
+- falsification tests work, and  
+- numerical artifacts are not mistaken for signals.[1]
 
-Weak-Signal Detection
-- Saulson, Physical Review D (1990)
-- Cagnoli et al., Review of Scientific Instruments (2000)
-
----
-
-Usage note:  
-For directory-level context and file descriptions, see simulation/README.md.
+A numerical **GO** is an invitation to build and validate hardware — **not a statement about nature.**[1]
