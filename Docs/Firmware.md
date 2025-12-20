@@ -1,8 +1,9 @@
-# Firmware — AIRM Spinner Control & Data Logging
+# Firmware — AIRM Spinner Control & Data Logging (Tier-1)
 
-This document describes the **firmware architecture, scope, and guarantees** used to operate the AIRM Spinner torsion-balance apparatus.
+This document describes the **authoritative Tier-1 firmware behavior**
+used to operate the AIRM Spinner torsion-balance apparatus.
 
-The firmware is intentionally minimal.  
+The firmware is intentionally minimal.
 Its role is **deterministic I/O control and transparent data logging**, not signal interpretation.
 
 All physics analysis is performed offline.
@@ -13,27 +14,21 @@ All physics analysis is performed offline.
 
 The firmware performs four essential tasks:
 
-1. **Impose controlled rotation** at a known modulation frequency (f_spin)
-2. **Read angular displacement** from the optical lever
-3. **Inject calibration torques** on command
-4. **Log raw data** continuously for offline analysis
+1. Impose controlled rotation at a fixed modulation frequency (`f_spin`)
+2. Read angular displacement from the optical lever
+3. Inject calibration torques on command
+4. Log raw data continuously for offline analysis
 
 The firmware explicitly does **not**:
 
 - Filter data
 - Demodulate signals
 - Estimate frequencies
+- Apply calibration scaling
 - Perform statistical tests
 - Make GO / NO-GO decisions
 
-The firmware may perform **minimal sanity checks only**, such as:
-- ADC range clamping
-- Counter overflow handling
-- Basic fault flags
-
-It never transforms or enhances the physics signal beyond **digitization, timestamping, and framing**.
-
-This separation ensures:
+This strict separation ensures:
 - Full auditability
 - Reversible data processing
 - No hidden signal conditioning
@@ -41,44 +36,44 @@ This separation ensures:
 
 ---
 
-## 2. Hardware Assumptions & Versioning
+## 2. Hardware Assumptions (Tier-1)
 
-The firmware assumes the following hardware, which is part of the **experimental definition**:
+The firmware assumes the following hardware:
 
 - MCU: Arduino Uno or Nano (ATmega328P)
 - Logic level: 5 V
 - ADC resolution: 10-bit
-- External 12 V supply for motor and calibration coil
+- External 12 V supply for stepper motor and calibration coil
 
-Any port to a different MCU, voltage rail, or timing source **must be treated as a new firmware version** and documented alongside the data.
+Any change to MCU, voltage rails, or timing source **requires a new firmware version**.
 
 ---
 
 ## 3. Rotation Control
 
-### 3.1 Rotation Strategy
+### 3.1 Strategy
 
 Rotation is implemented using:
 
-- Open-loop stepper control
-- Fixed step interval scheduling
-- No encoder or closed-loop feedback
+- Open-loop stepper motor control
+- Fixed step rate
+- No encoder or feedback
 
-The goal is not precise angular positioning, but **stable, slow, repeatable modulation**.
+The goal is **slow, repeatable modulation**, not angular precision.
 
 ---
 
-### 3.2 Typical Configuration (Parameterizable)
-
-Typical default configuration (set via firmware constants):
+### 3.2 Fixed Tier-1 Parameters
 
 - Motor: 200 steps per revolution
-- Microstepping: Full-step (configurable)
-- Step interval: 1 step per second (configurable)
-- Effective rotation frequency:  
-  f_spin ≈ 0.001 Hz (default)
+- Microstepping: Full step
+- Step rate: **0.2 steps/s**
+- Rotation period: 1000 s per revolution
+- Effective modulation frequency:
 
-Only the **parameters** are adjustable; the **conceptual approach** (slow, open-loop modulation) is fixed.
+f_spin = 0.001 Hz
+
+These parameters are **hard-coded** in Tier-1 firmware.
 
 ---
 
@@ -87,13 +82,14 @@ Only the **parameters** are adjustable; the **conceptual approach** (slow, open-
 Stepper timing is driven by:
 
 - `millis()`-based scheduling
-- Deterministic main loop execution
+- Deterministic loop execution
 
-This timing model is sufficient to:
-- Establish a known modulation timescale
-- Enable offline phase tracking
+The firmware does **not** attempt:
+- Clock discipline
+- ppm-level stability
+- Absolute time synchronization
 
-It is **not** intended to provide ppm-level frequency stability or clock discipline.
+This is sufficient for sideband detection in offline analysis.
 
 ---
 
@@ -104,30 +100,22 @@ It is **not** intended to provide ppm-level frequency stability or clock discipl
 - Signal source: Photodiode voltage divider
 - ADC reference: Arduino 5 V rail
 - ADC resolution: 10-bit (0–1023)
-- Sampling rate: 1 Hz (default)
+- Sampling rate: **1 Hz**
 
-Each sample is tagged with a **millisecond-resolution timestamp** using `millis()`.
+Each sample is tagged with a millisecond timestamp (`millis()`).
 
-No attempt is made to:
-- Discipline the clock
-- Correct drift
-- Apply filtering or gain correction
+No filtering, offset correction, or gain normalization is performed.
 
 ---
 
 ### 4.2 Signal Characteristics
 
-Typical operating behavior after alignment:
+Typical behavior after alignment:
 
 - Resting midpoint: ~512 ADC counts
 - Dynamic range: ±100 counts (geometry-dependent)
 
-The firmware does not:
-- Zero the signal
-- Track baseline drift
-- Normalize or scale readings
-
-Calibration is performed via injected torque and handled offline.
+Calibration and scaling are handled offline.
 
 ---
 
@@ -135,13 +123,13 @@ Calibration is performed via injected torque and handled offline.
 
 ### 5.1 Purpose
 
-The magnetic calibration coil provides:
+The magnetic coil provides:
 
 - Known, repeatable torque impulses
-- Validation of mechanical response
-- A safeguard against false positives
+- Mechanical response validation
+- A falsification control channel
 
-Every credible signal must be interpretable relative to injected calibration behavior.
+Calibration exists to validate the instrument — not to tune it.
 
 ---
 
@@ -149,55 +137,40 @@ Every credible signal must be interpretable relative to injected calibration beh
 
 - Output: PWM-capable digital pin
 - Driver: Logic-level MOSFET
-- Pulse duration: ~100 ms (typical)
-- Duty cycle: Configurable
+- Pulse duration: ~100 ms (fixed)
+- Duty cycle: Fixed in firmware
 
-Calibration pulses may be issued manually via serial command.
+Calibration pulses are issued manually via serial command (`C`).
 
 ---
 
 ### 5.3 Data Alignment
 
-Each calibration pulse is logged with:
+Calibration pulses are **not explicitly flagged** in the data stream.
 
-- A timestamp
-- A calibration flag in the data stream
+Injection timing is inferred during analysis using:
+- Known command timing
+- Characteristic angular response
 
-This allows injected torques to be aligned precisely with the optical-lever response during offline analysis.
+This design preserves raw-data primacy and simplicity.
 
 ---
 
 ## 6. Serial Data Logging
 
-### 6.1 Output Format
+### 6.1 Output Format (Authoritative)
 
-The firmware outputs **one CSV line per sample** over USB serial.
+The firmware outputs **one CSV line per sample**:
 
-Default field order:
+Time_ms,Theta_ADC,Status
 
-timestamp_ms, adc_raw, step_count, cal_flag
+**Field definitions:**
 
-Field definitions:
+- `Time_ms` — milliseconds since MCU reset
+- `Theta_ADC` — raw ADC value (0–1023)
+- `Status` — always `"OK"` (reserved for future diagnostics)
 
-- `timestamp_ms`  
-  Unsigned 32-bit integer, milliseconds since MCU reset
-
-- `adc_raw`  
-  Raw ADC count (0–1023)
-
-- `step_count`  
-  Cumulative motor step index (wraparound permitted)
-
-- `cal_flag`  
-  0 = normal sample  
-  1 = within calibration pulse window
-
-By default:
-- No header row is emitted
-- Output is ASCII CSV
-- One line corresponds to one sample
-
-This format is human-readable, script-friendly, and robust against dropped lines.
+No step count, calibration flag, or derived quantity is logged.
 
 ---
 
@@ -206,74 +179,63 @@ This format is human-readable, script-friendly, and robust against dropped lines
 A 1 Hz logging rate was chosen to:
 
 - Match simulation assumptions
-- Minimize serial bottlenecks
+- Minimize serial overhead
 - Avoid implicit filtering
-
-Higher sampling rates are possible but not required for the current analysis pipeline.
 
 ---
 
 ## 7. Command Interface
 
-The firmware supports a minimal serial command set:
+The Tier-1 firmware supports:
 
 | Command | Action |
-|-------|--------|
+|-------|-------|
 | `C` | Inject calibration torque pulse |
-| `S` | Report system status |
 
-Commands are optional, non-blocking, and logged.
-
-No command modifies:
+Commands are non-blocking and do not alter:
 - Rotation frequency
 - ADC scaling
 - Logging format
 
-This preserves experiment repeatability.
-
 ---
 
-## 8. Error Handling & Known Limitations
+## 8. Known Limitations
 
 The firmware:
 
-- Does not detect missed motor steps
+- Does not detect missed steps
 - Does not measure coil current
-- Does not provide absolute time synchronization
+- Does not provide absolute time sync
 
-These limitations are intentional and documented.
-
-Failures are designed to be **visible in the data**, not silently corrected.
+These limitations are intentional and visible in the data.
 
 ---
 
-## 9. Relation to Other Project Components
+## 9. Alignment with Other Components
 
-- Hardware design → `docs/hardware.md`
-- Calibration logic → `docs/calibration.md`
-- Simulation assumptions → `simulation/`
-- Data analysis → `analysis/`
+- Hardware → `hardware/`
+- Calibration → `docs/calibration.md`
+- Analysis → `docs/analysis.md`
+- Simulation → `simulation/`
 
-Firmware behavior is explicitly aligned with simulation parameters (sampling rate, modulation timescale).
+All parameters (sampling rate, modulation frequency) are consistent across components.
 
 ---
 
 ## 10. Design Guarantees
 
 - Firmware does not generate or enhance physics signals
-- All transformations are reversible from the serial data log
-- Any change to timing, motor control, or ADC behavior increments the firmware version and must be recorded with the data
+- All transformations are reversible
+- Any behavioral change increments the firmware version and must be recorded
 
 ---
 
 ## Status
 
-- Firmware: **Operational**
+- Firmware: **Frozen (Tier-1)**
 - Rotation control: **Validated**
 - Data logging: **Validated**
 - Calibration interface: **Validated**
-
-No “smart” features are planned.
 
 ---
 
