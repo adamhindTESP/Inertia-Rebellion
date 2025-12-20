@@ -1,15 +1,16 @@
-# Hardware — AIRM Spinner Apparatus
+# Hardware — AIRM Spinner Apparatus (Tier-1)
 
-This document describes the **hardware design** of the AIRM Spinner torsion-balance apparatus used in the Inertia Rebellion project.
+This document describes the **Tier-1 hardware design** of the AIRM Spinner torsion-balance apparatus used in the *Inertia Rebellion* project.
 
 The hardware is designed to be:
-- Low cost
-- Fully open
-- Replication-friendly
-- Explicit about limitations and systematics
+
+- Low cost  
+- Fully open  
+- Replication-friendly  
+- Explicit about limitations and systematics  
 
 This is **not precision metrology hardware**.  
-It is a **testbed for detecting and falsifying small inertial modulations** under controlled rotation.
+It is a **controlled testbed** for detecting *and falsifying* small inertial modulations under slow, deliberate rotation.
 
 ---
 
@@ -17,14 +18,14 @@ It is a **testbed for detecting and falsifying small inertial modulations** unde
 
 The AIRM Spinner consists of a **slowly rotating torsion pendulum** instrumented with:
 
-- A stepper-driven rotation stage
-- An optical lever angular readout
-- A magnetic calibration torque actuator
-- Continuous digital data logging
+- A stepper-driven rotation stage  
+- An optical-lever angular readout  
+- A magnetic calibration torque actuator  
+- Continuous digital data logging  
 
-The entire system is controlled by a single microcontroller and is intended to operate for **hours to days** without intervention.
+The entire system is controlled by a single microcontroller and is intended to operate continuously for **hours to days**.
 
-High-level architecture:
+### High-Level Architecture
 
 Arduino MCU
 ├── Stepper motor driver → Rotation stage
@@ -39,12 +40,12 @@ Arduino MCU
 Key design choices:
 
 - **Very low rotation frequency**
-  - Typical f_spin ≈ 0.001 Hz
-  - Minimizes mechanical disturbances
+  - Tier-1 target: f_spin ≈ 0.001 Hz
+  - Minimizes mechanical disturbance and vibration coupling
 
 - **Injected calibration torque**
-  - Ensures system responds to known forces
-  - Prevents mistaking noise for signal
+  - Ensures response to known forces
+  - Prevents misidentification of noise as signal
 
 - **Optical lever readout**
   - High sensitivity
@@ -52,9 +53,9 @@ Key design choices:
 
 - **Open electronics**
   - No proprietary sensors
-  - No black-box components
+  - No black-box signal conditioning
 
-Every subsystem is deliberately simple so that **failure modes are visible**, not hidden.
+All subsystems are intentionally simple so that **failure modes remain visible**, not hidden.
 
 ---
 
@@ -62,97 +63,102 @@ Every subsystem is deliberately simple so that **failure modes are visible**, no
 
 ### 3.1 Rotation System
 
-- **Motor:** NEMA 17 stepper motor
-- **Driver:** A4988 or DRV8825
-- **Coupling:** Direct or 1:1 mechanical coupling
-- **Control:** Open-loop, constant step rate
+- **Motor:** NEMA-17 stepper motor  
+- **Driver:** A4988 or DRV8825  
+- **Coupling:** Direct or 1:1 mechanical coupling  
+- **Control:** Open-loop, constant step rate  
 
-Typical configuration:
-- Full-step mode
-- ~1 step per second
-- Resulting in ~0.001 Hz rotation
+#### Tier-1 Configuration (Frozen)
 
-The rotation system is not intended to provide precise angular encoding.  
-Its purpose is to impose a **known, stable modulation timescale**.
+- Full-step mode  
+- **0.2 steps per second**  
+- 200 steps per revolution  
+- **1000 seconds per revolution**  
+- Effective modulation frequency:  
+  **f_spin ≈ 0.001 Hz**
+
+The rotation system is **not an encoder** and does not provide absolute angular position.
+
+Its purpose is to impose a **configured, repeatable modulation timescale** (set by firmware), not to measure angle.
 
 ---
 
 ### 3.2 Torsion Pendulum
 
-- **Suspension:** Thin torsion fiber (material user-selectable)
-- **Test mass:** Symmetric mass distribution
-- **Mirror:** Small front-surface mirror for optical lever
+- **Suspension:** Thin torsion fiber (material user-selectable)  
+- **Test mass:** Symmetric mass distribution  
+- **Mirror:** Small front-surface mirror for optical lever  
 
-Key properties:
-- Low torsional stiffness
-- Long decay time (high Q preferred)
-- Minimal magnetic and thermal asymmetries
+Desired properties:
 
-The exact mechanical design is intentionally flexible to allow replication with locally available materials.
+- Low torsional stiffness  
+- Long decay time (high Q preferred)  
+- Minimal magnetic and thermal asymmetry  
+
+The mechanical design is intentionally flexible to allow replication using locally available materials.
 
 ---
 
 ### 3.3 Optical Lever Readout
 
-The angular displacement θ(t) is measured using a **laser + photodiode optical lever**.
+Angular displacement θ(t) is measured using a **laser + photodiode optical lever**.
 
-Components:
-- 650 nm, 5 mW laser diode
-- Front-surface mirror on pendulum
-- BPW34 (or equivalent) photodiode
-- Resistor + RC filter into Arduino ADC
+**Components:**
+- 650 nm, 5 mW laser diode  
+- Front-surface mirror on pendulum  
+- BPW34 (or equivalent) photodiode  
+- Passive resistor + RC filter into Arduino ADC  
 
-Principle:
-- Angular deflection causes beam displacement
-- Photodiode voltage varies approximately linearly with θ
-- ADC digitizes signal at 1 Hz (typical)
+**Principle:**
+- Angular deflection → beam displacement  
+- Photodiode voltage varies approximately linearly with θ  
+- ADC digitizes at 1 Hz (Tier-1 default)
 
 This readout is:
-- Sensitive
-- Drift-prone (by design, so drift is observable)
-- Calibrated via injected torque
+- Sensitive  
+- Drift-prone by design (so drift is observable)  
+- Calibrated using injected torque
 
 ---
 
 ### 3.4 Magnetic Calibration Coil
 
-A magnetic calibration coil provides **known, repeatable torque impulses**.
+A magnetic calibration coil provides **explicit, repeatable torque injections**.
 
-Components:
-- Solenoidal coil (~500 turns, 28 AWG)
-- Logic-level N-channel MOSFET
-- Flyback protection diode
-- 12 V external supply
+**Components:**
+- Solenoidal coil (~500 turns, 28 AWG)  
+- Logic-level N-channel MOSFET  
+- Flyback protection diode  
+- 12 V external supply  
 
-Operation:
-- Short PWM pulse (e.g. 100 ms)
-- Produces known magnetic field
-- Couples to small magnet on test mass
+**Operation:**
+- Short current pulse (~100 ms typical)  
+- Produces magnetic field coupling to pendulum-mounted magnet  
 
-Purpose:
-- Verify torsion response
-- Measure system gain
-- Distinguish real dynamics from readout artifacts
+**Purpose:**
+- Verify torsional response  
+- Measure system gain  
+- Distinguish mechanical dynamics from readout artifacts  
 
-If a signal cannot be reproduced with injected torque, it is not trusted.
+If a signal cannot be reproduced using injected torque, it is **not trusted**.
 
 ---
 
 ### 3.5 Control Electronics
 
-- **Microcontroller:** Arduino Uno or Nano (ATmega328P)
+- **Microcontroller:** Arduino Uno or Nano (ATmega328P)  
 - **Interfaces:**
-  - Digital outputs: stepper control
-  - PWM output: coil driver
-  - Analog input: optical lever
-- **Logging:** USB serial, CSV format
+  - Digital outputs → stepper control  
+  - PWM output → calibration coil  
+  - Analog input → optical lever  
+- **Logging:** USB serial, CSV format  
 
-The Arduino was chosen for:
-- Simplicity
-- Transparency
-- Ease of replication
+The Arduino platform is used for:
+- Transparency  
+- Simplicity  
+- Replication ease  
 
-No timing-critical DSP is performed on-board.
+No timing-critical DSP or signal processing is performed onboard.
 
 ---
 
@@ -165,11 +171,11 @@ Two power domains are used:
 | MCU + optics | 5 V | USB or regulated supply |
 | Stepper + coil | 12 V | External wall adapter |
 
-All grounds are tied together at a single reference point.
+All grounds are tied at a single reference point.
 
 Care is taken to:
-- Avoid ground loops
-- Prevent motor noise from contaminating ADC readings
+- Avoid ground loops  
+- Prevent motor noise from contaminating ADC readings  
 
 ---
 
@@ -177,17 +183,17 @@ Care is taken to:
 
 Complete schematics are provided in the hardware directory:
 
-- `hardware/spinner_schematics.html` — interactive, printable
-- `hardware/spinner_schematics.pdf` — publication-ready PDF
-- `hardware/BOM.md` — component list and costs
+- `hardware/spinner_schematics.html` — interactive / printable  
+- `hardware/spinner_schematics.pdf` — publication-ready  
+- `hardware/BOM.md` — component list and costs  
 
-The schematics include:
-- Full pin mappings
-- Safety notes (laser, MOSFETs)
-- Validation checklist
-- Estimated cost breakdown
+Schematics include:
+- Full pin mappings  
+- Safety notes (laser, MOSFETs)  
+- Validation checklist  
+- Estimated cost breakdown  
 
-Builders are strongly encouraged to review the PDF before assembly.
+Builders are strongly encouraged to review schematics before assembly.
 
 ---
 
@@ -195,9 +201,9 @@ Builders are strongly encouraged to review the PDF before assembly.
 
 Electronics cost target (excluding mechanics):
 
-- **Total:** ~USD $75
-- **Microcontroller + motor + driver:** ~USD $45
-- **Optics + coil electronics:** ~USD $30
+- **Total:** ~USD $75  
+- **MCU + motor + driver:** ~USD $45  
+- **Optics + calibration electronics:** ~USD $30  
 
 Mechanical components (frame, fiber, enclosure) are intentionally not standardized.
 
@@ -205,48 +211,46 @@ Mechanical components (frame, fiber, enclosure) are intentionally not standardiz
 
 ## 7. Known Limitations
 
-This hardware **does not** provide:
+This hardware does **not** provide:
 
-- Absolute angle measurement
-- Temperature stabilization
-- Vibration isolation
-- Magnetic shielding beyond basic precautions
+- Absolute angle measurement  
+- Temperature stabilization  
+- Vibration isolation  
+- Magnetic shielding beyond basic precautions  
 
-These limitations are intentional and documented so that:
-- Noise sources remain visible
-- Overinterpretation is avoided
-- Replication does not require specialized facilities
+These limitations are intentional so that:
+- Noise sources remain visible  
+- Over-interpretation is avoided  
+- Replication does not require specialized facilities  
 
 ---
 
 ## 8. Safety Notes
 
-- **Laser:** Class 3R (5 mW). Avoid eye exposure.
-- **Stepper driver:** Set current limit before connecting motor.
-- **MOSFET:** Must be logic-level (Rds(on) specified at 4.5–5 V).
-- **Power:** Always share common ground between supplies.
+- **Laser:** Class 3R (5 mW). Avoid eye exposure.  
+- **Stepper driver:** Set current limit before connecting motor.  
+- **MOSFET:** Must be logic-level (Rds(on) specified at 4.5–5 V).  
+- **Power:** Always share common ground between supplies.  
 
-Failure to follow these guidelines can damage components or invalidate data.
+Failure to follow these guidelines may damage hardware or invalidate data.
 
 ---
 
-## 9. Relation to Other Docs
+## 9. Relation to Other Documentation
 
-- Firmware implementation → `docs/firmware.md`
-- Calibration procedures → `docs/calibration.md`
-- Data interpretation → `docs/analysis.md`
-- Simulations → `docs/simulation.md`
+- Firmware → `docs/firmware.md`  
+- Calibration → `docs/calibration.md`  
+- Analysis → `docs/analysis.md`  
+- Simulations → `simulation/`  
 
 ---
 
 ## Status
 
-- Hardware: **Replication-ready**
-- Schematics: **Complete**
-- BOM: **Complete**
-- Mechanical variants: **Open**
+- Hardware: **Replication-ready**  
+- Schematics: **Complete**  
+- BOM: **Complete**  
+- Mechanical variants: **Open**  
 
-This hardware will evolve as replications surface new constraints or improvements.
-
-The goal is not perfection —  
-the goal is **testability**.
+The goal is not perfection.  
+The goal is **testability**.
