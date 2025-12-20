@@ -115,7 +115,7 @@
 
   <div class="header">
     <h1>AIRM SPINNER — Hardware Schematics</h1>
-    <div class="subtitle">Inertia Rebellion Project | Hardware v0.1 | December 2025</div>
+    <div class="subtitle">Inertia Rebellion Project | Hardware v1.0 | December 2025</div>
     <div class="subtitle">CERN OHL-P v2 | Open Hardware</div>
   </div>
 
@@ -188,7 +188,7 @@ TORQUE ESTIMATION
   <!-- ================== FOOTER ================== -->
   <div style="margin-top:40px; padding-top:20px; border-top:2px solid #000; text-align:center; font-size:12px;">
     <p><strong>AIRM Spinner — Tier-1 Hardware</strong></p>
-    <p>Frozen Release v0.1 | December 2025</p>
+    <p>Frozen Release v1.0 | December 2025</p>
     <p>CERN OHL-P v2 | github.com/adamhindTESP/Inertia-Rebellion</p>
   </div>
 
