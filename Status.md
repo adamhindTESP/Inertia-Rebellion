@@ -3,7 +3,7 @@
 **Project:** Inertia Rebellion  
 **Active Module:** AIRM (Anisotropic Inertial Response Model)  
 **Current Phase:** Phase 1 — Hardware Fabrication & Bench Validation  
-**Latest Stable Release:** See GitHub Releases  
+**Latest Stable Release:** v1.0.0 (Tier-1 Methods & Instrumentation Freeze)  
 **Experimental Data:** None collected
 
 ---
@@ -18,7 +18,7 @@ The following components are complete and publicly available:
 - Tier-1 hardware design, BOMs, and build documentation
 - Formal hardware validation protocol and gating criteria
 - Firmware for rotation control, calibration, and angular readout
-- Open-source repository structure with versioned release (v0.1)
+- Open-source repository structure with a tagged Tier-1 release
 
 All designs, documentation, and software are released as open hardware / open source
 under CERN OHL-P v2 and MIT-compatible licenses.
@@ -45,10 +45,12 @@ No physical interpretation, anomaly discussion, or parameter constraints are per
 until **all Tier-1 validation gates** are passed on real hardware.
 
 Numerical “GO” decisions in this repository indicate that:
+
 - the analysis pipeline is well-behaved, and
 - the instrument design is *worth constructing and validating*.
 
 They do **not** imply:
+
 - detection of an effect,
 - expectation of new physics, or
 - experimental constraints on physical models.
@@ -76,10 +78,11 @@ the documented validation protocol.
 
 Significant changes to scope, interpretation policy, or experimental status
 will be reflected by:
+
 - a new tagged release, and
 - an update to this file.
 
 ---
 
-**Last updated:** v0.1 Methods & instrumentation freeze (v1.0)
+**Last updated:** v1.0.0 Tier-1 methods & instrumentation freeze  
 **Status:** Instrumentation development in progress
