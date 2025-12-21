@@ -3,7 +3,7 @@
 **Project:** Inertia Rebellion  
 **Active Module:** AIRM (Anisotropic Inertial Response Model)  
 **Current Phase:** Phase 1 — Hardware Fabrication & Bench Validation  
-**Latest Stable Release:** v0.1  
+**Latest Stable Release:** See GitHub Releases  
 **Experimental Data:** None collected
 
 ---
@@ -81,5 +81,5 @@ will be reflected by:
 
 ---
 
-**Last updated:** v0.1 release  
+**Last updated:** v0.1 Methods & instrumentation freeze (v1.0)
 **Status:** Instrumentation development in progress
