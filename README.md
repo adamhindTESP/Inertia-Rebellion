@@ -133,7 +133,7 @@ Full analysis code is available in:
 
 ## Hardware Platform: AIRM Spinner
 
-The AIRM module uses a low-cost, vacuum-compatible torsion-balance platform referred to
+The AIRM module uses a low-cost, vacuum-compatible torsion-balance platform (design-intended not implemented in Tier-1) referred to
 throughout the repository as the **AIRM Spinner**.
 
 **Key subsystems:**
