@@ -70,6 +70,7 @@ These values are **order-of-magnitude**, not precision parameters.
 
 Exact torque calibration is performed empirically.
 
+Exact dimensions are recorded per build and reported with data.
 ---
 
 ## 4. Torque Model (Order-of-Magnitude)
@@ -200,6 +201,8 @@ Angular sensitivity ≈ ΔADC / Δθ
 This factor is geometry-dependent and must be measured, not assumed.
 
 No scaling is applied in firmware.
+
+Multiple injections are averaged to reduce stochastic noise.
 
 ---
 
