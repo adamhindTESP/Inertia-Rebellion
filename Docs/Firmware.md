@@ -214,8 +214,8 @@ These limitations are intentional and visible in the data.
 ## 9. Alignment with Other Components
 
 - Hardware → `hardware/`
-- Calibration → `docs/calibration.md`
-- Analysis → `docs/analysis.md`
+- Calibration → `Docs/calibration.md`
+- Analysis → `Docs/analysis.md`
 - Simulation → `simulation/`
 
 All parameters (sampling rate, modulation frequency) are consistent across components.
