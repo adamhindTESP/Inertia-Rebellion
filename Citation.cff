@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 
-title: "Inertia Rebellion: Open-Source Instrumentation for Precision Inertial Anisotropy Tests"
+title: "Inertia Rebellion v1.0.0: Open-Source Methods and Instrumentation for Precision Inertial Anisotropy Tests"
 
 message: >
   If you use this repository, the AIRM Spinner hardware, firmware,
@@ -12,13 +12,13 @@ authors:
     given-names: Adam
     affiliation: Independent Researcher, Coquitlam, BC, Canada
 
-version: 1.0
+version: 1.0.0
 
 date-released: 2025-12-20
 
 licenses:
-  - CERN-OHL-P-2.0
   - MIT
+  - CERN-OHL-P-2.0
 
 repository-code: https://github.com/adamhindTESP/Inertia-Rebellion/releases/tag/v1.0.0
 
@@ -26,14 +26,15 @@ abstract: >
   Inertia Rebellion (AIRM) is an open-source citizen science initiative
   developing precision torsion-balance instrumentation for testing
   inertial anisotropy and related frame-dependent effects.
-  This v1.0 methods-only release documents:
+  This v1.0.0 methods-only release documents:
   (1) a Mach-inspired phenomenological model,
   (2) numerical sensitivity and falsification simulations,
   (3) a quadrature demodulation analysis pipeline targeting
       f_spin ± f_sid sidebands,
   (4) ultra-slow Arduino-based spinner hardware and control firmware,
   and (5) Tier-1 validation and calibration gates with mandatory null tests.
-  Numerical simulations establish a target sensitivity of order α ~ 10⁻¹⁰.
+  Numerical simulations establish a target sensitivity of order
+  alpha ~ 1e-10.
   No experimental hardware has yet been built and no physical data or
   constraints are reported.
 
@@ -52,7 +53,7 @@ preferred-citation:
     - family-names: Hind
       given-names: Adam
   title: >
-    AIRM Spinner v1.0: Open-Source Torsion-Balance Platform for Inertial Anisotropy Tests
+    AIRM Spinner v1.0: Open-Source Torsion-Balance Platform for Inertial Anisotropy Tests (Methods-Only Release)
   journal: "Inertia Rebellion Project (Tier-1 Methods Release)"
   year: 2025
   month: 12
