@@ -112,10 +112,10 @@ The same observable definition is used for all baseline and spinner runs.
 
 Tier‑1 analysis uses only the following fixed frequencies:
 
-'f_spin'
-'f_sid'
-'f_spin + f_sid'
-'f_spin - f_sid'
+- 'f_spin'
+- 'f_sid'
+- 'f_spin + f_sid'
+- 'f_spin - f_sid'
 
 
 No frequency scanning is permitted.
