@@ -1,4 +1,4 @@
-# Release Notes — v0.1
+# Release Notes — v1.0.0
 
 **Project:** Inertia Rebellion  
 **Module:** AIRM (Anisotropic Inertial Response Model)  
@@ -9,7 +9,7 @@
 
 ## Scope of This Release
 
-Release **v0.1** constitutes a **methods-only instrumentation release**.
+Release **v1.0.0** constitutes a **methods-only instrumentation release**.
 
 It includes:
 - Phenomenological theory framing (AIRM)
@@ -37,7 +37,7 @@ Numerical “GO” results indicate internal pipeline consistency only.
 
 ## Freeze Policy
 
-All files associated with v0.1 are considered **frozen**.
+All files associated with v1.0.0 are considered **frozen**.
 
 Any of the following require a new tagged release:
 - Changes to theory assumptions
@@ -58,5 +58,5 @@ This release exists to support **replication, review, and preparation** for futu
 
 ---
 
-**Release tag:** v0.1  
+**Release tag:** v1.0.0  
 **Date:** 2025  
