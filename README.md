@@ -147,10 +147,12 @@ throughout the repository as the **AIRM Spinner**.
 - **Actuation and Calibration**  
   Magnetic torque coil and controlled rotation stage  
 
-- **Isolation**  
-  Compact vacuum enclosure and passive vibration control  
+- **Isolation**    
+  Tier-1 operates at ambient pressure with no active isolation.  
+  Vacuum enclosure and passive vibration control are **planned Tier-2 extensions**, not implemented in this release.
 
-**Estimated total system cost:** ~**$200 USD**
+**Estimated total system cost:** Estimated Tier-1 component cost (order of magnitude): ~$200 USD  
+(actual cost depends on sourcing, region, and implementation choices)
 
 Complete build documentation, BOMs, firmware, and validation gates are provided in:
 
